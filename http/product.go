@@ -8,7 +8,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/ortymid/t3-grpc/market"
+	"github.com/ortymid/market/market"
 )
 
 // ProductHandler forwards product requests to the business logic.

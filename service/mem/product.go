@@ -3,7 +3,7 @@ package mem
 import (
 	"sync"
 
-	"github.com/ortymid/t3-grpc/market"
+	"github.com/ortymid/market/market"
 )
 
 type ProductService struct {

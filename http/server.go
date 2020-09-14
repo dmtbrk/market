@@ -9,7 +9,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/ortymid/t3-grpc/market"
+	"github.com/ortymid/market/market"
 )
 
 // Run is a convenient function to start an http server with graceful shotdown.

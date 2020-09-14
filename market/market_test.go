@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	"github.com/ortymid/t3-grpc/market"
-	"github.com/ortymid/t3-grpc/market/mock"
+	"github.com/ortymid/market/market"
+	"github.com/ortymid/market/market/mock"
 )
 
 type MockFuncUser struct {

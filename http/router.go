@@ -11,8 +11,8 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
-	"github.com/ortymid/t3-grpc/jwt"
-	"github.com/ortymid/t3-grpc/market"
+	"github.com/ortymid/market/jwt"
+	"github.com/ortymid/market/market"
 )
 
 // type ProductsRequest struct{}

@@ -6,7 +6,7 @@ package mock
 
 import (
 	gomock "github.com/golang/mock/gomock"
-	market "github.com/ortymid/t3-grpc/market"
+	market "github.com/ortymid/market/market"
 	reflect "reflect"
 )
 

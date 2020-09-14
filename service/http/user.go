@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/ortymid/t3-grpc/market"
+	"github.com/ortymid/market/market"
 )
 
 type UserService struct {

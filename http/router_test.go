@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/ortymid/t3-grpc/market"
+	"github.com/ortymid/market/market"
 )
 
 var key *rsa.PrivateKey
