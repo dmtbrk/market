@@ -1,6 +1,6 @@
-# Task 2: HTTP service
+# Market
 
-This project is an HTTP service that lets users manage their products. User management is provided by [AIexMoran/httpCRUD](https://github.com/AIexMoran/httpCRUD) service.
+This service lets users manage their products. User management is provided by [AIexMoran/httpCRUD](https://github.com/AIexMoran/httpCRUD) service.
 
 ## How to run
 
