@@ -14,7 +14,7 @@ func TestParse(t *testing.T) {
 
 	t.Run("Should parse a valid token", func(t *testing.T) {
 		wantClaims := &Claims{
-			UserID: 1,
+			UserID: "1",
 		}
 
 		token := jwt.NewWithClaims(jwt.SigningMethodRS256, wantClaims)
@@ -32,5 +32,6 @@ func TestParse(t *testing.T) {
 		if !reflect.DeepEqual(got, wantClaims) {
 			t.Errorf("Parse() = %v, want %v", got, wantClaims)
 		}
+		t.Logf("got: %#v", got)
 	})
 }
