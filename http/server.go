@@ -14,25 +14,13 @@ import (
 	"github.com/ortymid/market/market"
 )
 
+// Server handles incoming http requests and calls corresponding Market methods.
 type Server struct {
 	Market    market.Interface
 	JWTAlg    string
 	JWTSecret interface{}
 
 	httpSrv *http.Server
-}
-
-func NewServer(port int, market market.Interface) *Server {
-	httpSrv := &http.Server{
-		Addr: fmt.Sprintf(":%d", port),
-	}
-
-	s := Server{
-		Market: market,
-	}
-	s.setupHTTP(httpSrv)
-
-	return &s
 }
 
 func (s *Server) setupHTTP(httpSrv *http.Server) {
@@ -52,8 +40,14 @@ func (s *Server) setupHandler(httpSrv *http.Server) {
 	httpSrv.Handler = handler.JWTMiddleware(r, s.JWTAlg, s.JWTSecret)
 }
 
-// Run is a convenient function to start an http server with graceful shotdown.
-func (s *Server) Run() {
+// Run starts the server with graceful shotdown.
+func (s *Server) Run(port int) {
+	httpSrv := &http.Server{
+		Addr: fmt.Sprintf(":%d", port),
+	}
+
+	s.setupHTTP(httpSrv)
+
 	idle := make(chan struct{})
 	go func() {
 		done := make(chan os.Signal, 1)
