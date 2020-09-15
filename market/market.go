@@ -5,6 +5,8 @@ import (
 	"fmt"
 )
 
+//go:generate mockgen -destination=./mock/market.go -package=mock -mock_names=Interface=MockMarket . Interface
+
 // ErrPermission is an error returned when a user does not have rights
 // to do Market methods.
 type ErrPermission struct {
