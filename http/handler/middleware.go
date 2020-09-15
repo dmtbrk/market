@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/ortymid/market/jwt"
@@ -16,7 +15,8 @@ func JWTMiddleware(h http.Handler, alg string, secret interface{}) http.Handler 
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		tokenString, err := getTokenString(r)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			http.Error(w, err.Error(), http.StatusForbidden)
+			return
 		}
 		if len(tokenString) == 0 { // no token is ok
 			h.ServeHTTP(w, r)
@@ -25,14 +25,17 @@ func JWTMiddleware(h http.Handler, alg string, secret interface{}) http.Handler 
 
 		claims, err := jwt.Parse(tokenString, alg, secret)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			http.Error(w, err.Error(), http.StatusForbidden)
 			return
 		}
 
-		userID := strconv.Itoa(claims.UserID)
+		if len(claims.UserID) == 0 {
+			http.Error(w, "user id is not in JWT claims", http.StatusForbidden)
+			return
+		}
 
 		ctx := r.Context()
-		ctx = context.WithValue(ctx, KeyUserID, userID)
+		ctx = context.WithValue(ctx, KeyUserID, claims.UserID)
 
 		h.ServeHTTP(w, r.WithContext(ctx))
 	}
@@ -40,11 +43,11 @@ func JWTMiddleware(h http.Handler, alg string, secret interface{}) http.Handler 
 }
 
 // getTokenString looks for the JWT in the Authorization header.
-// Absence of the token cosidered a normal case.
+// An empty token with nil error indicates the absence of Authorization header.
 func getTokenString(r *http.Request) (string, error) {
 	auth := r.Header.Get("Authorization")
 	if len(auth) == 0 {
-		return "", nil // ok, no token
+		return "", nil // no Authorization header
 	}
 
 	authFields := strings.Fields(auth)
