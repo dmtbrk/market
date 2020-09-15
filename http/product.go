@@ -144,6 +144,7 @@ func (h *ProductHandler) Edit(w http.ResponseWriter, r *http.Request) {
 
 	product.Name = data.Name
 	product.Price = data.Price
+	product.Seller = userID
 
 	product, err = h.market.ReplaceProduct(product, userID)
 	if err != nil {
