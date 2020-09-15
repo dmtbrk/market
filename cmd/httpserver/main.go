@@ -32,7 +32,8 @@ func main() {
 		ProductService: productService,
 	}
 
-	httpserver.Run(config.Port, config.JWTAlg, config.JWTSecret, m)
+	httpSrv := httpserver.NewServer(config.Port, m)
+	httpSrv.Run()
 }
 
 func getConfig() *Config {
