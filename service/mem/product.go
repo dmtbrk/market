@@ -26,7 +26,7 @@ func NewProductService() *ProductService {
 		{ID: 9, Name: "Carrot", Price: 1400, Seller: "bunny"},
 		{ID: 10, Name: "Carrot", Price: 1400, Seller: "bunny"},
 	}
-	return &ProductService{products: products, lastID: 2}
+	return &ProductService{products: products, lastID: 10}
 }
 
 func (srv *ProductService) Products(ctx context.Context, offset int, limit int) ([]*market.Product, error) {
@@ -102,30 +102,18 @@ func (srv *ProductService) EditProduct(ctx context.Context, r market.EditProduct
 	return nil, market.ErrProductNotFound
 }
 
-func (srv *ProductService) ReplaceProduct(np *market.Product) (*market.Product, error) {
-	srv.mu.Lock()
-	defer srv.mu.Unlock()
-
-	for i, op := range srv.products {
-		if op.ID == np.ID {
-			srv.products[i] = np
-			return np, nil
-		}
-	}
-	return nil, market.ErrProductNotFound
-}
-
 func (srv *ProductService) DeleteProduct(ctx context.Context, id int) error {
 	srv.mu.Lock()
 	defer srv.mu.Unlock()
 
 	for i, p := range srv.products {
 		if p.ID == id {
-			if i == len(srv.products)-1 {
+			if i == len(srv.products)-1 { // The last element.
 				srv.products[i] = nil
 				srv.products = srv.products[:i]
+			} else {
+				srv.products = append(srv.products[:i], srv.products[i+1:]...)
 			}
-			copy(srv.products[i:], srv.products[i+1:])
 			return nil
 		}
 	}
