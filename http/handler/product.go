@@ -45,11 +45,7 @@ func (h *ProductHandler) List(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Printf("%#v", products)
 
-	err = json.NewEncoder(w).Encode(products)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	jsonResponse(w, products)
 }
 
 // Detail handles requests for the specific product detail.
@@ -79,11 +75,7 @@ func (h *ProductHandler) Detail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = json.NewEncoder(w).Encode(product)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	jsonResponse(w, product)
 }
 
 // Create handles requests for creation of new products.
@@ -119,11 +111,7 @@ func (h *ProductHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = json.NewEncoder(w).Encode(product)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	jsonResponse(w, product)
 }
 
 // Edit handles product edit requests.
@@ -165,11 +153,7 @@ func (h *ProductHandler) Edit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = json.NewEncoder(w).Encode(product)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	jsonResponse(w, product)
 }
 
 // Delete handles product delete requests.
@@ -202,13 +186,24 @@ func (h *ProductHandler) Delete(w http.ResponseWriter, r *http.Request) {
 
 func getVarProductID(r *http.Request) (int, error) {
 	vars := mux.Vars(r)
+
 	idString, ok := vars["id"]
 	if !ok {
 		return 0, errors.New("product id not specified")
 	}
+
 	id, err := strconv.Atoi(idString)
 	if err != nil {
 		return 0, errors.New("product id is not an integer")
 	}
 	return id, nil
+}
+
+func jsonResponse(w http.ResponseWriter, data interface{}) {
+	w.Header().Add("Content-Type", "application/json")
+
+	err := json.NewEncoder(w).Encode(data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
