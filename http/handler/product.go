@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -17,7 +18,8 @@ type ProductHandler struct {
 }
 
 func (h *ProductHandler) Setup(r *mux.Router) {
-	r.HandleFunc("/", h.List).Methods(http.MethodGet)
+	listHandler := PaginationMiddleware(http.HandlerFunc(h.List))
+	r.Handle("/", listHandler).Methods(http.MethodGet)
 	r.HandleFunc("/", h.Create).Methods(http.MethodPost)
 	r.HandleFunc("/{id}", h.Detail).Methods(http.MethodGet)
 	r.HandleFunc("/{id}", h.Edit).Methods(http.MethodPut)
@@ -26,14 +28,24 @@ func (h *ProductHandler) Setup(r *mux.Router) {
 
 // List handles requests for all products.
 func (h *ProductHandler) List(w http.ResponseWriter, r *http.Request) {
-	products, err := h.Market.Products()
+	ctx := r.Context()
+
+	page, ok := ctx.Value(KeyPage).(Page)
+	if !ok {
+		log.Printf("ERROR: context value for KeyPage is %v", page)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+	log.Printf("%#v", page)
+
+	products, err := h.Market.Products(ctx, page.Offset, page.Limit)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	log.Printf("%#v", products)
 
-	resp := productListResponse(products)
-	err = json.NewEncoder(w).Encode(resp)
+	err = json.NewEncoder(w).Encode(products)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -42,6 +54,8 @@ func (h *ProductHandler) List(w http.ResponseWriter, r *http.Request) {
 
 // Detail handles requests for the specific product detail.
 func (h *ProductHandler) Detail(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	vars := mux.Vars(r)
 	idString, ok := vars["id"]
 	if !ok {
@@ -54,7 +68,7 @@ func (h *ProductHandler) Detail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	product, err := h.Market.Product(id)
+	product, err := h.Market.Product(ctx, id)
 	if err != nil {
 		err = fmt.Errorf("getting product: %w", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -65,8 +79,7 @@ func (h *ProductHandler) Detail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := productDetailResponse(*product)
-	err = json.NewEncoder(w).Encode(resp)
+	err = json.NewEncoder(w).Encode(product)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -75,25 +88,24 @@ func (h *ProductHandler) Detail(w http.ResponseWriter, r *http.Request) {
 
 // Create handles requests for creation of new products.
 func (h *ProductHandler) Create(w http.ResponseWriter, r *http.Request) {
-	userID, ok := r.Context().Value(KeyUserID).(string)
+	ctx := r.Context()
+
+	userID, ok := ctx.Value(KeyUserID).(string)
 	if !ok {
 		http.Error(w, "authorization required", http.StatusForbidden)
 		return
 	}
 
-	data := struct {
-		Name  string `json:"name"`
-		Price int    `json:"price"`
-	}{}
-	err := json.NewDecoder(r.Body).Decode(&data)
+	var pr market.AddProductRequest
+	err := json.NewDecoder(r.Body).Decode(&pr)
 	if err != nil {
 		err = fmt.Errorf("decoding create product request: %w", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	pr.Seller = userID
 
-	product := &market.Product{Name: data.Name, Price: data.Price, Seller: userID}
-	product, err = h.Market.AddProduct(product, userID)
+	product, err := h.Market.AddProduct(ctx, pr, userID)
 	if err != nil {
 		status := http.StatusInternalServerError
 		if errors.Is(err, &market.ErrPermission{}) {
@@ -107,8 +119,7 @@ func (h *ProductHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := productCreateResponse(*product)
-	err = json.NewEncoder(w).Encode(resp)
+	err = json.NewEncoder(w).Encode(product)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -117,7 +128,9 @@ func (h *ProductHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 // Edit handles product edit requests.
 func (h *ProductHandler) Edit(w http.ResponseWriter, r *http.Request) {
-	userID, ok := r.Context().Value(KeyUserID).(string)
+	ctx := r.Context()
+
+	userID, ok := ctx.Value(KeyUserID).(string)
 	if !ok {
 		http.Error(w, "authorization required", http.StatusForbidden)
 		return
@@ -129,24 +142,16 @@ func (h *ProductHandler) Edit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	product := &market.Product{ID: id}
-
-	data := struct {
-		Name  string `json:"name"`
-		Price int    `json:"price"`
-	}{}
-	err = json.NewDecoder(r.Body).Decode(&data)
+	var pr market.EditProductRequest
+	err = json.NewDecoder(r.Body).Decode(&pr)
 	if err != nil {
 		err = fmt.Errorf("decoding create product request: %w", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	pr.ID = id
 
-	product.Name = data.Name
-	product.Price = data.Price
-	product.Seller = userID
-
-	product, err = h.Market.ReplaceProduct(product, userID)
+	product, err := h.Market.EditProduct(ctx, pr, userID)
 	if err != nil {
 		status := http.StatusInternalServerError
 		if errors.Is(err, &market.ErrPermission{}) || errors.Is(err, market.ErrProductNotFound) {
@@ -160,8 +165,7 @@ func (h *ProductHandler) Edit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := productEditResponse(*product)
-	err = json.NewEncoder(w).Encode(resp)
+	err = json.NewEncoder(w).Encode(product)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -170,7 +174,9 @@ func (h *ProductHandler) Edit(w http.ResponseWriter, r *http.Request) {
 
 // Delete handles product delete requests.
 func (h *ProductHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	userID, ok := r.Context().Value(KeyUserID).(string)
+	ctx := r.Context()
+
+	userID, ok := ctx.Value(KeyUserID).(string)
 	if !ok {
 		http.Error(w, "authorization: token required", http.StatusForbidden)
 		return
@@ -182,17 +188,7 @@ func (h *ProductHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// product, err := h.market.Product(id)
-	// if err != nil {
-	// 	http.Error(w, http.StatusInternalServerError, err)
-	// 	return
-	// }
-	// if product == nil {
-	// 	http.Error(w, http.StatusInternalServerError, errors.New("something went wrong"))
-	// 	return
-	// }
-
-	err = h.Market.DeleteProduct(id, userID)
+	err = h.Market.DeleteProduct(ctx, id, userID)
 	if err != nil {
 		status := http.StatusInternalServerError
 		if errors.Is(err, &market.ErrPermission{}) || errors.Is(err, market.ErrProductNotFound) {
@@ -208,73 +204,11 @@ func getVarProductID(r *http.Request) (int, error) {
 	vars := mux.Vars(r)
 	idString, ok := vars["id"]
 	if !ok {
-		return 0, errors.New("id not specified")
+		return 0, errors.New("product id not specified")
 	}
 	id, err := strconv.Atoi(idString)
 	if err != nil {
-		return 0, errors.New("id is not an integer")
+		return 0, errors.New("product id is not an integer")
 	}
 	return id, nil
-}
-
-type productListResponse []*market.Product
-
-func (r productListResponse) MarshalJSON() ([]byte, error) {
-	type respProduct struct {
-		ID     int    `json:"id"`
-		Name   string `json:"name"`
-		Price  int    `json:"price"`
-		Seller string `json:"seller"`
-	}
-
-	respProducts := make([]respProduct, len(r))
-	for i, p := range r {
-		respProducts[i] = respProduct{
-			ID:     p.ID,
-			Name:   p.Name,
-			Price:  p.Price,
-			Seller: p.Seller,
-		}
-	}
-
-	return json.Marshal(respProducts)
-}
-
-type productDetailResponse market.Product
-
-func (r productDetailResponse) MarshalJSON() ([]byte, error) {
-	type respProduct struct {
-		ID     int    `json:"id"`
-		Name   string `json:"name"`
-		Price  int    `json:"price"`
-		Seller string `json:"seller"`
-	}
-
-	return json.Marshal(respProduct(r))
-}
-
-type productCreateResponse market.Product
-
-func (r productCreateResponse) MarshalJSON() ([]byte, error) {
-	type respProduct struct {
-		ID     int    `json:"id"`
-		Name   string `json:"name"`
-		Price  int    `json:"price"`
-		Seller string `json:"seller"`
-	}
-
-	return json.Marshal(respProduct(r))
-}
-
-type productEditResponse market.Product
-
-func (r productEditResponse) MarshalJSON() ([]byte, error) {
-	type respProduct struct {
-		ID     int    `json:"id"`
-		Name   string `json:"name"`
-		Price  int    `json:"price"`
-		Seller string `json:"seller"`
-	}
-
-	return json.Marshal(respProduct(r))
 }

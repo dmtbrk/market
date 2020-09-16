@@ -1,5 +1,5 @@
 .PHONY: all
-all: build run
+all: build up
 
 build:
 	docker-compose build

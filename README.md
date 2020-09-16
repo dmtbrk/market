@@ -18,7 +18,7 @@ This service lets users manage their products. User management is provided by [A
 
 ## Usage
 
-`GET /products/` lists all products.
+`GET /products/?offset=0&limit=10` lists all products in the given range. Offset and limit parameters required.
 
 `GET /products/{id}` shows product details by the specified id.
 

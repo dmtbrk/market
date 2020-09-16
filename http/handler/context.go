@@ -2,4 +2,7 @@ package handler
 
 type contextKey int
 
-const KeyUserID contextKey = 0
+const (
+	KeyUserID contextKey = iota
+	KeyPage
+)

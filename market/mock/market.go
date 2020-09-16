@@ -5,6 +5,7 @@
 package mock
 
 import (
+	context "context"
 	gomock "github.com/golang/mock/gomock"
 	market "github.com/ortymid/market/market"
 	reflect "reflect"
@@ -34,18 +35,18 @@ func (m *MockMarket) EXPECT() *MockMarketMockRecorder {
 }
 
 // AddProduct mocks base method
-func (m *MockMarket) AddProduct(arg0 *market.Product, arg1 string) (*market.Product, error) {
+func (m *MockMarket) AddProduct(arg0 context.Context, arg1 market.AddProductRequest, arg2 string) (*market.Product, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddProduct", arg0, arg1)
+	ret := m.ctrl.Call(m, "AddProduct", arg0, arg1, arg2)
 	ret0, _ := ret[0].(*market.Product)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // AddProduct indicates an expected call of AddProduct
-func (mr *MockMarketMockRecorder) AddProduct(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockMarketMockRecorder) AddProduct(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddProduct", reflect.TypeOf((*MockMarket)(nil).AddProduct), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddProduct", reflect.TypeOf((*MockMarket)(nil).AddProduct), arg0, arg1, arg2)
 }
 
 // DeleteProduct mocks base method
@@ -62,34 +63,49 @@ func (mr *MockMarketMockRecorder) DeleteProduct(arg0, arg1 interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteProduct", reflect.TypeOf((*MockMarket)(nil).DeleteProduct), arg0, arg1)
 }
 
-// Product mocks base method
-func (m *MockMarket) Product(arg0 int) (*market.Product, error) {
+// EditProduct mocks base method
+func (m *MockMarket) EditProduct(arg0 context.Context, arg1 market.EditProductRequest, arg2 string) (*market.Product, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Product", arg0)
+	ret := m.ctrl.Call(m, "EditProduct", arg0, arg1, arg2)
+	ret0, _ := ret[0].(*market.Product)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EditProduct indicates an expected call of EditProduct
+func (mr *MockMarketMockRecorder) EditProduct(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EditProduct", reflect.TypeOf((*MockMarket)(nil).EditProduct), arg0, arg1, arg2)
+}
+
+// Product mocks base method
+func (m *MockMarket) Product(arg0 context.Context, arg1 int) (*market.Product, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Product", arg0, arg1)
 	ret0, _ := ret[0].(*market.Product)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Product indicates an expected call of Product
-func (mr *MockMarketMockRecorder) Product(arg0 interface{}) *gomock.Call {
+func (mr *MockMarketMockRecorder) Product(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Product", reflect.TypeOf((*MockMarket)(nil).Product), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Product", reflect.TypeOf((*MockMarket)(nil).Product), arg0, arg1)
 }
 
 // Products mocks base method
-func (m *MockMarket) Products() ([]*market.Product, error) {
+func (m *MockMarket) Products(arg0 context.Context, arg1, arg2 int) ([]*market.Product, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Products")
+	ret := m.ctrl.Call(m, "Products", arg0, arg1, arg2)
 	ret0, _ := ret[0].([]*market.Product)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Products indicates an expected call of Products
-func (mr *MockMarketMockRecorder) Products() *gomock.Call {
+func (mr *MockMarketMockRecorder) Products(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Products", reflect.TypeOf((*MockMarket)(nil).Products))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Products", reflect.TypeOf((*MockMarket)(nil).Products), arg0, arg1, arg2)
 }
 
 // ReplaceProduct mocks base method
