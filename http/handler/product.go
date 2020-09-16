@@ -22,7 +22,7 @@ func (h *ProductHandler) Setup(r *mux.Router) {
 	r.Handle("/", listHandler).Methods(http.MethodGet)
 	r.HandleFunc("/", h.Create).Methods(http.MethodPost)
 	r.HandleFunc("/{id}", h.Detail).Methods(http.MethodGet)
-	r.HandleFunc("/{id}", h.Edit).Methods(http.MethodPut)
+	r.HandleFunc("/{id}", h.Edit).Methods(http.MethodPatch)
 	r.HandleFunc("/{id}", h.Delete).Methods(http.MethodDelete)
 }
 

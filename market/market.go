@@ -34,8 +34,6 @@ type Interface interface {
 	AddProduct(ctx context.Context, r AddProductRequest, userID string) (*Product, error)
 	EditProduct(ctx context.Context, r EditProductRequest, userID string) (*Product, error)
 	DeleteProduct(ctx context.Context, id int, userID string) error
-
-	ReplaceProduct(p *Product, userID string) (*Product, error)
 }
 
 // Market composes business logic from different services.
@@ -129,26 +127,4 @@ func (m *Market) DeleteProduct(ctx context.Context, id int, userID string) error
 		return err
 	}
 	return nil
-}
-
-// ReplaceProduct updates information about the product with the new one by product ID.
-func (m *Market) ReplaceProduct(p *Product, userID string) (*Product, error) {
-	// Check the user for permission. Only the existence of the user counts yet.
-	_, err := m.UserService.User(userID)
-	if errors.Is(err, &ErrUserNotFound{}) {
-		err = fmt.Errorf("edit product: %w", &ErrPermission{Reason: err})
-		return nil, err
-	}
-	if err != nil {
-		err = fmt.Errorf("edit product: %w", err)
-		return nil, err
-	}
-
-	// After the user check, add the product.
-	p, err = m.ProductService.ReplaceProduct(p)
-	if err != nil {
-		err = fmt.Errorf("edit product: %w", err)
-		return nil, err
-	}
-	return p, nil
 }

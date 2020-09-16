@@ -16,8 +16,6 @@ type ProductService interface {
 	AddProduct(ctx context.Context, r AddProductRequest) (*Product, error)
 	EditProduct(ctx context.Context, r EditProductRequest) (*Product, error)
 	DeleteProduct(ctx context.Context, id int) error
-
-	ReplaceProduct(*Product) (*Product, error)
 }
 
 type Product struct {
