@@ -2,15 +2,23 @@ version: "3"
 
 services:
   market_http:
-    build: .
+    build: ./cmd/httpserver
     env_file: .env
     ports:
       - 8080:8080
     depends_on:
       - user_http
 
+  market_grpc:
+    build: ./cmd/grpcserver
+    env_file: .env
+    ports:
+      - 8081:8081
+    depends_on:
+      - user_http
+
   user_http:
-    build: ~/Projects/Sigma/Internship/peers/AlexMoran/httpCRUD
-    env_file: ~/Projects/Sigma/Internship/peers/AlexMoran/httpCRUD/.env
+    build: ~/Projects/Sigma/Internship/peers/AiexMoran/httpCRUD
+    env_file: ~/Projects/Sigma/Internship/peers/AiexMoran/httpCRUD/.env
     ports:
       - 8888:8888

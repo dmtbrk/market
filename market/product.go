@@ -22,13 +22,13 @@ type Product struct {
 	ID     int    `json:"id"`
 	Name   string `json:"name"`
 	Price  int    `json:"price"`
-	Seller string `json:"seller"`
+	Seller string `json:"seller"` // ID of the user
 }
 
 type AddProductRequest struct {
 	Name   string `json:"name"`
 	Price  int    `json:"price"`
-	Seller string `json:"seller"`
+	Seller string `json:"seller"` // ID of the user
 }
 
 // EditProductRequest contains fields meant to be changed on the product with
@@ -36,6 +36,6 @@ type AddProductRequest struct {
 type EditProductRequest struct {
 	ID     int    `json:"id"` // required
 	Name   string `json:"name"`
-	Price  *int   `json:"price"` // nil means do nothing with the field, zero means make it free
-	Seller string `json:"seller"`
+	Price  *int   `json:"price"`  // nil means do nothing with the field, zero means make it free
+	Seller string `json:"seller"` // ID of the user
 }
