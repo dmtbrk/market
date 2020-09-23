@@ -1,23 +1,27 @@
 version: "3"
 
 services:
-  market_http:
-    build: ./cmd/httpserver
+  http_gateway:
+    build: 
+      context: .
+      dockerfile: ./cmd/httpgateway/Dockerfile
     env_file: .env
     ports:
       - 8080:8080
     depends_on:
-      - user_http
+      - http_user_service
 
-  market_grpc:
-    build: ./cmd/grpcserver
+  grpc_server:
+    build: 
+      context: .
+      dockerfile: ./cmd/grpcserver/Dockerfile
     env_file: .env
     ports:
       - 8081:8081
     depends_on:
-      - user_http
+      - http_user_service
 
-  user_http:
+  http_user_service:
     build: ~/Projects/Sigma/Internship/peers/AiexMoran/httpCRUD
     env_file: ~/Projects/Sigma/Internship/peers/AiexMoran/httpCRUD/.env
     ports:

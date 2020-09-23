@@ -16,7 +16,7 @@ type Client struct {
 }
 
 func (c *Client) Connect(serverAddr string) error {
-	conn, err := grpc.Dial(serverAddr)
+	conn, err := grpc.Dial(serverAddr, grpc.WithInsecure())
 	if err != nil {
 		return err
 	}
