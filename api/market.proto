@@ -1,7 +1,5 @@
 syntax = "proto3";
 
-// import "google/protobuf/wrappers.proto";
-
 package pb;
 
 option go_package = "./pb;pb";
@@ -28,16 +26,19 @@ message AddProductRequest {
     string name = 1;
     int32 price = 2;
     string seller = 3;
+    string userID = 4;
 }
 
 message EditProductRequest {
-    string name = 1;
-    // google.protobuf.Int32Value price = 2;
-    optional int32 price = 2;
+    int32 id = 1;
+    string name = 2;
+    optional int32 price = 3;
+    string userID = 4;
 }
 
 message DeleteProductRequest {
     int32 id = 1;
+    string userID = 2;
 }
 
 message ProductReply {

@@ -14,16 +14,11 @@ func main() {
 	userService := http.NewUserService(config.UserServiceURL)
 	productService := mem.NewProductService()
 
-	m := &market.Market{
-		UserService:    userService,
-		ProductService: productService,
-	}
-
 	server := &grpc.Server{
-		Market: m,
-
-		JWTAlg:    config.GRPC.JWT.Alg,
-		JWTSecret: config.GRPC.JWT.Secret,
+		Market: &market.Market{
+			UserService:    userService,
+			ProductService: productService,
+		},
 	}
 
 	err := server.Run(config.GRPC.Port)

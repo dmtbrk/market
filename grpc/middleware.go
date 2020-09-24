@@ -2,29 +2,28 @@ package grpc
 
 import (
 	"context"
-	"log"
 
 	"google.golang.org/grpc"
 )
 
-type AuthFunc func(context.Context) (context.Context, error)
+// ContextFunc is meant to be a pluggable function that somehow manipulates
+// with the context.
+type ContextFunc func(context.Context) (context.Context, error)
 
-type AuthMiddleware struct {
-	AuthFunc AuthFunc
-
-	protectedMethods map[string]bool
+// ContextMiddleware holds a function that is called on the request context.
+type ContextMiddleware struct {
+	ContextFunc ContextFunc
 }
 
-func (m *AuthMiddleware) Unary() grpc.UnaryServerInterceptor {
+// Unary returns an unary interceptor.
+func (m *ContextMiddleware) Unary() grpc.UnaryServerInterceptor {
 	return func(
 		ctx context.Context,
 		req interface{},
 		info *grpc.UnaryServerInfo,
 		handler grpc.UnaryHandler,
 	) (interface{}, error) {
-		log.Printf("JWT Interceptor: method %q", info.FullMethod)
-
-		ctx, err := m.AuthFunc(ctx)
+		ctx, err := m.ContextFunc(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -33,17 +32,17 @@ func (m *AuthMiddleware) Unary() grpc.UnaryServerInterceptor {
 	}
 }
 
-func (m *AuthMiddleware) Stream() grpc.StreamServerInterceptor {
+// Stream returns a stream interceptor.
+func (m *ContextMiddleware) Stream() grpc.StreamServerInterceptor {
 	return func(
 		srv interface{},
 		stream grpc.ServerStream,
 		info *grpc.StreamServerInfo,
 		handler grpc.StreamHandler,
 	) error {
-		log.Println("JWT stream handling...")
-
 		ctx := stream.Context()
-		ctx, err := m.AuthFunc(ctx)
+
+		ctx, err := m.ContextFunc(ctx)
 		if err != nil {
 			return err
 		}

@@ -27,6 +27,7 @@ type HTTP struct {
 }
 
 type GRPC struct {
+	Host string
 	Port int
 	JWT  JWT
 }
@@ -42,6 +43,8 @@ func FromEnv() *Config {
 	if err != nil {
 		panic("cannot read PORT: " + err.Error())
 	}
+
+	grpcHost := os.Getenv("GRPC_HOST")
 
 	grpcPortString := getEnvDefault("GRPC_PORT", "8080")
 	grpcPort, err := strconv.Atoi(grpcPortString)
@@ -73,6 +76,7 @@ func FromEnv() *Config {
 		},
 
 		GRPC: GRPC{
+			Host: grpcHost,
 			Port: grpcPort,
 			JWT: JWT{
 				Alg:    jwtAlg,

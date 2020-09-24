@@ -12,20 +12,20 @@ import (
 func main() {
 	config := config.FromEnv()
 
-	m := &grpc.Client{}
-	err := m.Connect(fmt.Sprintf("grpc_server:%d", config.GRPC.Port))
+	marketClient := &grpc.Client{}
+	err := marketClient.Connect(fmt.Sprintf("%s:%d", config.GRPC.Host, config.GRPC.Port))
 	if err != nil {
 		panic(err)
 	}
 
 	httpSrv := httpserver.Server{
-		Market:    m,
+		Market:    marketClient,
 		JWTAlg:    config.JWTAlg,
 		JWTSecret: config.JWTSecret,
 	}
 	httpSrv.Run(config.Port)
 
-	if err := m.Disconnect(); err != nil {
+	if err := marketClient.Disconnect(); err != nil {
 		log.Println(err)
 	}
 }

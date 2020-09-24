@@ -1,10 +1,15 @@
-FROM golang:1.15
+FROM golang:alpine AS build
 
 WORKDIR /go/src/github.com/ortymid/market
 
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
+
 COPY . .
+RUN go build -o /go/bin/httpgateway ./cmd/httpgateway
 
-RUN go get -d -v ./...
-RUN go install -v ./...
+FROM golang:alpine
+COPY --from=build /go/bin/httpgateway /go/bin/httpgateway
 
-CMD ["httpgateway"]
+CMD ["/go/bin/httpgateway"]
