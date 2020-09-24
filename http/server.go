@@ -9,21 +9,44 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/ortymid/t3-grpc/market"
+	"github.com/gorilla/mux"
+	"github.com/ortymid/market/http/handler"
+	"github.com/ortymid/market/market"
 )
 
-// Run is a convenient function to start an http server with graceful shotdown.
-func Run(port int, jwtAlg string, jwtSecret interface{}, m market.Interface) {
-	handler := &Router{
-		Market:    m,
-		JWTAlg:    jwtAlg,
-		JWTSecret: jwtSecret,
+// Server handles incoming http requests and calls corresponding Market methods.
+type Server struct {
+	Market    market.Interface
+	JWTAlg    string
+	JWTSecret interface{}
+
+	httpSrv *http.Server
+}
+
+func (s *Server) setupHTTP(httpSrv *http.Server) {
+	s.setupHandler(httpSrv)
+	s.httpSrv = httpSrv
+}
+
+func (s *Server) setupHandler(httpSrv *http.Server) {
+	r := mux.NewRouter()
+
+	sr := r.PathPrefix("/products").Subrouter()
+	productHandler := &handler.ProductHandler{
+		Market: s.Market,
+	}
+	productHandler.Setup(sr)
+
+	httpSrv.Handler = handler.JWTMiddleware(r, s.JWTAlg, s.JWTSecret)
+}
+
+// Run starts the server with graceful shotdown.
+func (s *Server) Run(port int) {
+	httpSrv := &http.Server{
+		Addr: fmt.Sprintf(":%d", port),
 	}
 
-	srv := &http.Server{
-		Addr:    fmt.Sprintf(":%d", port),
-		Handler: handler,
-	}
+	s.setupHTTP(httpSrv)
 
 	idle := make(chan struct{})
 	go func() {
@@ -31,7 +54,7 @@ func Run(port int, jwtAlg string, jwtSecret interface{}, m market.Interface) {
 		signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 		<-done
 		log.Println("Gracefully stopping...")
-		if err := srv.Shutdown(context.Background()); err != nil {
+		if err := s.httpSrv.Shutdown(context.Background()); err != nil {
 			log.Println("server Shutdown:", err)
 		}
 		close(idle)
@@ -39,11 +62,11 @@ func Run(port int, jwtAlg string, jwtSecret interface{}, m market.Interface) {
 	}()
 
 	go func() {
-		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+		if err := s.httpSrv.ListenAndServe(); err != http.ErrServerClosed {
 			log.Fatalln("server ListenAndServe:", err)
 		}
 	}()
-	log.Print("Server started at ", srv.Addr)
+	log.Print("Server started at ", s.httpSrv.Addr)
 
 	<-idle
 }

@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "./pb;pb";
+
+
+service Market {
+    rpc Products (ProductsRequest) returns (stream ProductReply) {}
+    rpc Product (ProductRequest) returns (ProductReply) {}
+    rpc AddProduct (AddProductRequest) returns (ProductReply) {}
+    rpc EditProduct (EditProductRequest) returns (ProductReply) {}
+    rpc DeleteProduct (DeleteProductRequest) returns (Empty) {}
+} 
+
+message ProductsRequest {
+    int32 offset = 1;
+    int32 limit = 2;
+}
+
+message ProductRequest {
+    int32 id = 1;
+}
+
+message AddProductRequest {
+    string name = 1;
+    int32 price = 2;
+    string seller = 3;
+    string userID = 4;
+}
+
+message EditProductRequest {
+    int32 id = 1;
+    string name = 2;
+    optional int32 price = 3;
+    string userID = 4;
+}
+
+message DeleteProductRequest {
+    int32 id = 1;
+    string userID = 2;
+}
+
+message ProductReply {
+    int32 id = 1;
+    string name = 2;
+    int32 price = 3;
+    string seller = 4;
+}
+
+message Empty {}

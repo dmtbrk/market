@@ -1,5 +1,5 @@
 .PHONY: all
-all: build run
+all: build up
 
 build:
 	docker-compose build
@@ -27,5 +27,5 @@ gen:
 	go generate ./...
 
 protoc:
-	 protoc -I proto/ proto/market.proto --go_out=plugins=grpc:grpc
+	 protoc -I api/ api/market.proto --go_out=plugins=grpc:grpc --experimental_allow_proto3_optional
 
