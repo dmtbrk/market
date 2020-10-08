@@ -2,7 +2,9 @@ package http
 
 import (
 	"context"
-	"fmt"
+	"github.com/ortymid/market/http/route"
+	"github.com/ortymid/market/market/product"
+	"github.com/rs/cors"
 	"log"
 	"net/http"
 	"os"
@@ -10,63 +12,60 @@ import (
 	"syscall"
 
 	"github.com/gorilla/mux"
-	"github.com/ortymid/market/http/handler"
-	"github.com/ortymid/market/market"
 )
 
-// Server handles incoming http requests and calls corresponding Market methods.
 type Server struct {
-	Market    market.Interface
-	JWTAlg    string
-	JWTSecret interface{}
-
-	httpSrv *http.Server
+	AuthService    AuthService
+	ProductService product.Interface
 }
 
-func (s *Server) setupHTTP(httpSrv *http.Server) {
-	s.setupHandler(httpSrv)
-	s.httpSrv = httpSrv
-}
-
-func (s *Server) setupHandler(httpSrv *http.Server) {
+func (s *Server) handler() http.Handler {
 	r := mux.NewRouter()
 
-	sr := r.PathPrefix("/products").Subrouter()
-	productHandler := &handler.ProductHandler{
-		Market: s.Market,
-	}
-	productHandler.Setup(sr)
+	// Product
+	products := route.Product{ProductService: s.ProductService}
+	products.Setup(r)
 
-	httpSrv.Handler = handler.JWTMiddleware(r, s.JWTAlg, s.JWTSecret)
+	// GraphQL
+	gql := route.GraphQL{ProductService: s.ProductService}
+	gql.Setup(r.PathPrefix("/gql/").Subrouter())
+
+	// CORS
+	h := cors.Default().Handler(r)
+
+	// Auth
+	h = AuthMiddleware(s.AuthService, h)
+
+	return h
 }
 
-// Run starts the server with graceful shotdown.
-func (s *Server) Run(port int) {
-	httpSrv := &http.Server{
-		Addr: fmt.Sprintf(":%d", port),
+func (s *Server) Run(addr string) {
+	httpServer := http.Server{
+		Addr:    addr,
+		Handler: s.handler(),
 	}
 
-	s.setupHTTP(httpSrv)
-
-	idle := make(chan struct{})
+	wait := make(chan struct{})
 	go func() {
 		done := make(chan os.Signal, 1)
 		signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+
 		<-done
 		log.Println("Gracefully stopping...")
-		if err := s.httpSrv.Shutdown(context.Background()); err != nil {
-			log.Println("server Shutdown:", err)
+		if err := httpServer.Shutdown(context.Background()); err != nil {
+			log.Println("shutting down server:", err)
 		}
-		close(idle)
-		log.Println("Server stopped")
+
+		close(wait)
+		log.Println("Server stopped.")
 	}()
 
 	go func() {
-		if err := s.httpSrv.ListenAndServe(); err != http.ErrServerClosed {
-			log.Fatalln("server ListenAndServe:", err)
+		if err := httpServer.ListenAndServe(); err != http.ErrServerClosed {
+			log.Fatalln("listening:", err)
 		}
 	}()
-	log.Print("Server started at ", s.httpSrv.Addr)
+	log.Printf("Server started at %s.", httpServer.Addr)
 
-	<-idle
+	<-wait
 }

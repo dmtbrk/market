@@ -1,0 +1,28 @@
+type Product {
+    id: String!
+    name: String!
+    price: Int!
+    seller: String!
+}
+
+type Query {
+    products(offset: Int!, limit: Int!): [Product!]!
+    product(id: ID!): Product!
+}
+
+input NewProduct {
+    name: String!
+    price: Int!
+}
+
+input UpdateProduct {
+    id: String!
+    name: String
+    price: Int
+}
+
+type Mutation {
+    createProduct(input: NewProduct!): Product!
+    updateProduct(input: UpdateProduct!): Product!
+    deleteProduct(id: String!): Product!
+}

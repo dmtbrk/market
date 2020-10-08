@@ -1,0 +1,36 @@
+schema:
+  - api/product.graphql
+
+exec:
+  filename: gql/gen/gen.cont
+  package: gen
+
+federation:
+  filename: gql/gen/fed.cont
+  package: gen
+
+model:
+  filename: gql/model/gen.cont
+  package: model
+
+resolver:
+  layout: follow-schema
+  dir: gql
+  package: gql
+  filename_template: "{name}.resolvers.cont"
+
+autobind:
+  - "github.com/ortymid/market/gql/model"
+
+models:
+  Int:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int64
+
+#  ID:
+#    model:
+#      - github.com/99designs/gqlgen/graphql.ID
+#      - github.com/99designs/gqlgen/graphql.Int
+#      - github.com/99designs/gqlgen/graphql.Int64
+#      - github.com/99designs/gqlgen/graphql.Int32
+

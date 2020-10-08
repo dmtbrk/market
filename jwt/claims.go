@@ -12,9 +12,9 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
-// UnmarshalJSON takes care of converting Claims.UserID to a string if it came as an integer.
+// UnmarshalJSON converts Claims.UserID to a string if it is an integer.
 func (c *Claims) UnmarshalJSON(data []byte) error {
-	// Standart claims first.
+	// Standard claims first.
 	sc := jwt.StandardClaims{}
 	err := json.Unmarshal(data, &sc)
 	if err != nil {
@@ -22,7 +22,7 @@ func (c *Claims) UnmarshalJSON(data []byte) error {
 	}
 	c.StandardClaims = sc
 
-	// Try to unmarshal id as a string.
+	// Try to unmarshal the id as a string.
 	idStr := struct {
 		ID string `json:"id"`
 	}{}
@@ -31,7 +31,7 @@ func (c *Claims) UnmarshalJSON(data []byte) error {
 		// Successful unmarshaling. Continuing the normal flow.
 		c.UserID = idStr.ID
 	} else {
-		// Try to unmarshal id as an integer if this field caused error.
+		// Try to unmarshal the id as an integer.
 		if err, ok := err.(*json.UnmarshalTypeError); ok && err.Field == "id" {
 			idInt := struct {
 				ID int64 `json:"id"`
@@ -42,7 +42,7 @@ func (c *Claims) UnmarshalJSON(data []byte) error {
 				return err
 			}
 
-			// Set UserID as a string.
+			// Set the id as a string.
 			c.UserID = strconv.FormatInt(idInt.ID, 10)
 		} else {
 			// Error is not caused by id field. Returning.

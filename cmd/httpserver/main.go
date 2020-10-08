@@ -1,88 +1,38 @@
 package main
 
 import (
-	"crypto/rsa"
-	"encoding/json"
-	"errors"
+	"database/sql"
 	"fmt"
-	"net/http"
-	"os"
-	"strconv"
+	"github.com/ortymid/market/config"
+	"github.com/ortymid/market/http"
+	"github.com/ortymid/market/market/product"
+	"github.com/ortymid/market/storage/postgres"
+	"log"
 
-	httpserver "github.com/ortymid/market/http"
-	"github.com/ortymid/market/market"
-	httpservice "github.com/ortymid/market/service/http"
-	"github.com/ortymid/market/service/mem"
+	_ "github.com/lib/pq"
 )
 
-type Config struct {
-	Port           int
-	JWTAlg         string
-	JWTSecret      interface{}
-	UserServiceURL string
-}
-
 func main() {
-	config := getConfig()
+	cfg, err := config.FromEnv()
+	if err != nil {
+		panic(fmt.Errorf("getting config: %w", err))
+	}
 
-	userService := httpservice.NewUserService(config.UserServiceURL)
-	productService := mem.NewProductService()
-	m := &market.Market{
-		UserService:    userService,
+	db, err := sql.Open("postgres", cfg.DatabaseURL)
+	if err != nil {
+		log.Fatalf("Unable to connect to postgres: %v", err)
+	}
+	log.Printf("Connected to postgres at %v", cfg.DatabaseURL)
+
+	productService := &product.Service{
+		Storage: postgres.NewProductStorage(db, "products"),
+	}
+
+	httpServer := http.Server{
+		AuthService:    http.NewJWTAuthService(cfg.JWTServiceURL),
 		ProductService: productService,
 	}
 
-	httpSrv := httpserver.Server{
-		Market:    m,
-		JWTAlg:    config.JWTAlg,
-		JWTSecret: config.JWTSecret,
-	}
-	httpSrv.Run(config.Port)
-}
-
-func getConfig() *Config {
-	portString := getEnvDefault("PORT", "8080")
-	port, err := strconv.Atoi(portString)
-	if err != nil {
-		panic("cannot read PORT: " + err.Error())
-	}
-
-	jwtAlg := getEnvDefault("JWT_ALG", "HS256")
-	jwtSecret, err := getKey(os.Getenv("KEY_SERVICE_URL"))
-	if err != nil {
-		panic(fmt.Errorf("cannot get JWT secret: %w", err))
-	}
-
-	usURL := os.Getenv("USER_SERVICE_URL")
-
-	return &Config{
-		Port:           port,
-		JWTAlg:         jwtAlg,
-		JWTSecret:      jwtSecret,
-		UserServiceURL: usURL,
-	}
-}
-
-func getKey(url string) (*rsa.PublicKey, error) {
-	resp, err := http.Get(url)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode != http.StatusOK {
-		return nil, errors.New("something went wrong")
-	}
-
-	key := &rsa.PublicKey{}
-	err = json.NewDecoder(resp.Body).Decode(key)
-	defer resp.Body.Close()
-
-	return key, err
-}
-
-func getEnvDefault(key string, d string) string {
-	val, ok := os.LookupEnv(key)
-	if !ok {
-		val = d
-	}
-	return val
+	addr := fmt.Sprintf(":%d", cfg.HTTPPort)
+	httpServer.Run(addr)
 }
