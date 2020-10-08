@@ -1,16 +1,48 @@
 version: "3"
 
 services:
-  market_http:
-    build: .
+  http_gateway:
+    build:
+      context: .
+      dockerfile: ./cmd/httpgateway/Dockerfile
     env_file: .env
     ports:
-      - 8080:8080
+      - ${MARKET_HTTP_PORT}:${MARKET_HTTP_PORT}
     depends_on:
-      - user_http
+      - grpc_server
 
-  user_http:
-    build: ~/Projects/Sigma/Internship/peers/AlexMoran/httpCRUD
-    env_file: ~/Projects/Sigma/Internship/peers/AlexMoran/httpCRUD/.env
+  grpc_server:
+    build:
+      context: .
+      dockerfile: ./cmd/grpcserver/Dockerfile
+    env_file: .env
     ports:
-      - 8888:8888
+      - ${MARKET_GRPC_PORT}:${MARKET_GRPC_PORT}
+    depends_on:
+      - redis
+      - postgres
+      - mongo
+
+  user-auth_service:
+    image: aiexmoran/httpcrud:2
+    env_file: .env
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
+
+  redis:
+    image: redis:alpine
+
+  postgres:
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - "./scripts/postgres:/docker-entrypoint-initdb.d/"
+
+  mongo:
+    image: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo
+      MONGO_INITDB_ROOT_PASSWORD: mongo
+
+
