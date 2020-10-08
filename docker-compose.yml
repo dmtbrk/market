@@ -45,4 +45,6 @@ services:
       MONGO_INITDB_ROOT_USERNAME: mongo
       MONGO_INITDB_ROOT_PASSWORD: mongo
 
+  elasticsearch:
+    image: elasticsearch:7.9.2
 

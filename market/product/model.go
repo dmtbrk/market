@@ -13,9 +13,9 @@ type ListRequest struct {
 }
 
 type CreateRequest struct {
-	Name   string
-	Price  int64
-	Seller string
+	Name   string `json:"name"`
+	Price  int64  `json:"price"`
+	Seller string `json:"seller"`
 }
 
 type UpdateRequest struct {

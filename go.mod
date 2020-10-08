@@ -5,6 +5,7 @@ go 1.15
 require (
 	github.com/99designs/gqlgen v0.13.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/elastic/go-elasticsearch/v7 v7.9.0
 	github.com/go-redis/redis/v8 v8.2.3
 	github.com/golang/mock v1.4.4
 	github.com/golang/protobuf v1.4.2

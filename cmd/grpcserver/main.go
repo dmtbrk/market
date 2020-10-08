@@ -7,6 +7,7 @@ import (
 	"github.com/ortymid/market/config"
 	"github.com/ortymid/market/grpc"
 	"github.com/ortymid/market/market/product"
+	"github.com/ortymid/market/storage/elasticsearch"
 	"github.com/ortymid/market/storage/mongo"
 	"github.com/ortymid/market/storage/postgres"
 	"github.com/ortymid/market/storage/redis"
@@ -46,6 +47,10 @@ func run() error {
 }
 
 func getProductStorage(cfg *config.Config) (product.Storage, error) {
+	if len(cfg.ElasticsearchURL) != 0 {
+		return getElasticsearchProductStorage()
+	}
+
 	if len(cfg.DatabaseURL) == 0 {
 		return nil, errors.New("database url is empty")
 	}
@@ -62,6 +67,15 @@ func getProductStorage(cfg *config.Config) (product.Storage, error) {
 	default:
 		return nil, errors.New("unknown database in database url")
 	}
+}
+
+func getElasticsearchProductStorage() (*elasticsearch.ProductStorage, error) {
+	es, err := elasticsearch.NewDefaultClient()
+	if err != nil {
+		return nil, err
+	}
+
+	return elasticsearch.NewProductStorage(es, "products"), nil
 }
 
 func getRedisProductStorage(dbURL string) (*redis.ProductStorage, error) {

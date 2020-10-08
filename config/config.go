@@ -15,7 +15,8 @@ type Config struct {
 
 	JWTServiceURL string
 
-	DatabaseURL string
+	DatabaseURL      string
+	ElasticsearchURL string
 }
 
 func FromEnv() (*Config, error) {
@@ -39,6 +40,8 @@ func FromEnv() (*Config, error) {
 
 	databaseURL := os.Getenv("MARKET_DATABASE_URL")
 
+	elasticsearchURL := os.Getenv("ELASTICSEARCH_URL")
+
 	return &Config{
 		HTTPHost: httpHost,
 		HTTPPort: httpPort,
@@ -48,6 +51,7 @@ func FromEnv() (*Config, error) {
 
 		JWTServiceURL: jwtServiceURL,
 
-		DatabaseURL: databaseURL,
+		DatabaseURL:      databaseURL,
+		ElasticsearchURL: elasticsearchURL,
 	}, nil
 }
