@@ -134,8 +134,8 @@ Response example:
 
 ### GraphQL
 
-The GraphQL schema is in [/api/product.graphql](/api/product.graphql) file. 
-You can use `/gql/play` endpoint to open a GraphQL playground to try out the API.
+The GraphQL schema is in this file: [/api/product.graphql](/api/product.graphql). 
+You can use `/gql/play` endpoint to open a GraphQL playground and try out the API.
 
 #### Authorization
 
