@@ -29,6 +29,9 @@ If you don't want to run database services which you don't need, just comment th
 
 ## API
 
+- [REST](#REST)
+- [GraphQL](#GraphQL)
+
 ### REST
 
 `GET /products/?offset=0&limit=10` lists all products in the given range. Offset and limit parameters are required.
@@ -128,6 +131,11 @@ Response example:
     "seller": "1234"
 }
 ```
+
+### GraphQL
+
+The GraphQL schema is in [/api/product.graphql](/api/product.graphql) file. 
+You can use `/gql/play` endpoint to open a GraphQL playground to try out the API.
 
 #### Authorization
 
