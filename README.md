@@ -141,7 +141,7 @@ You can use `/gql/play` endpoint to open a GraphQL playground and try out the AP
 
 Requests to protected resources are expected to have an `Authorization` header with a token issued by `AIexMoran/httpCRUD`.
 This service starts alongside with the product service (`make` or `make run` does it), so additional actions
-not required. 
+are not required. 
 The usage may be found [here](https://github.com/AIexMoran/httpCRUD).
 
 Example:
