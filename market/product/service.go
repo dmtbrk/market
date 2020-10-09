@@ -10,6 +10,7 @@ type Service struct {
 	Storage Storage
 }
 
+// List returns a list of products for the given request.
 func (s *Service) List(ctx context.Context, r ListRequest) ([]*Product, error) {
 	ps, err := s.Storage.List(ctx, r)
 	if err != nil {
@@ -19,6 +20,8 @@ func (s *Service) List(ctx context.Context, r ListRequest) ([]*Product, error) {
 	return ps, nil
 }
 
+// Get returns a product for the given id. It returns product.ErrNotFound error if
+// there is no product with such id.
 func (s *Service) Get(ctx context.Context, id string) (*Product, error) {
 	p, err := s.Storage.Get(ctx, id)
 	if err != nil {
@@ -28,6 +31,7 @@ func (s *Service) Get(ctx context.Context, id string) (*Product, error) {
 	return p, nil
 }
 
+// Create creates a new product and returns it.
 func (s *Service) Create(ctx context.Context, r CreateRequest) (p *Product, err error) {
 	user, err := auth.UserFromContext(ctx)
 	if err != nil {
@@ -47,6 +51,8 @@ func (s *Service) Create(ctx context.Context, r CreateRequest) (p *Product, err 
 	return p, nil
 }
 
+// Update updates a product for the given id and returns it. It returns product.ErrNotFound
+// error if there is no product with such id.
 func (s *Service) Update(ctx context.Context, r UpdateRequest) (*Product, error) {
 	user, err := auth.UserFromContext(ctx)
 	if err != nil {
@@ -75,6 +81,8 @@ func (s *Service) Update(ctx context.Context, r UpdateRequest) (*Product, error)
 	return p, nil
 }
 
+// Delete deletes a product for the given id. It returns product.ErrNotFound
+// error if there is no product with such id.
 func (s *Service) Delete(ctx context.Context, id string) (*Product, error) {
 	user, err := auth.UserFromContext(ctx)
 	if err != nil {
