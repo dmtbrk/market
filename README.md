@@ -7,17 +7,31 @@ for authorization.
 
 `Docker` and `docker-compose` must be installed on the system to be able to run this project.
 
-- `make` builds and runs the project in Docker.
+- `make` builds and runs the project.
 
-- `make run` creates and runs Docker containers of this project and `AIexMoran/httpCRUD`.
+- `make run` creates and runs Docker containers.
 
-- `make build` builds or rebuilds services.
+- `make build` builds or rebuilds Docker containers.
 
-## Usage
+`.env` file in this repository provides all environment variables needed to run this service.
+It is expected to be present when running with `docker-compose`.
 
-### HTTP
+The service works with the following databases as a product storage providers:
+- Redis
+- Postgres
+- MongoDB
+- Elasticsearch
 
-`GET /products/?offset=0&limit=10` lists all products in the given range. Offset and limit parameters required.
+To switch between Redis, Postgres, and MongoDB use the `DATABASE_URL` environment variable.
+To switch to Elasticsearch use the `ELASTICSEARCH_URL`. If it is set, the `DATABASE_URL` is ignored.  
+
+If you don't want to run database services which you don't need, just comment them out in `docker-compose.yml`.
+
+## API
+
+### REST
+
+`GET /products/?offset=0&limit=10` lists all products in the given range. Offset and limit parameters are required.
 
 Response example:
 ```
@@ -55,7 +69,7 @@ Response example:
 }
 ```
 
-`POST /products/` adds a product to the product list. Authorization required.
+`POST /products/` adds a product to the product list. Authorization is required.
 
 Request example:
 ```
@@ -78,7 +92,7 @@ Response example:
 }
 ```
 
-`PATCH /products/{id}` updates product data by the specified id. Update only happens for provided fields. Authorization required.
+`PATCH /products/{id}` updates product data by the specified id. Update only happens for provided fields. Authorization is required.
 
 Request example:
 ```
@@ -100,7 +114,7 @@ Response example:
 }
 ```
 
-`DELETE /products/{id}` removes the product by the specified id. Authorization required. 
+`DELETE /products/{id}` removes the product by the specified id. Authorization is required. 
 
 Response example:
 ```
