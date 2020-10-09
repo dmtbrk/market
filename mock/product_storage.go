@@ -11,31 +11,31 @@ import (
 	reflect "reflect"
 )
 
-// MockProductStorage is a mock of Storage interface
-type MockProductStorage struct {
+// ProductStorage is a mock of Storage interface
+type ProductStorage struct {
 	ctrl     *gomock.Controller
-	recorder *MockProductStorageMockRecorder
+	recorder *ProductStorageMockRecorder
 }
 
-// MockProductStorageMockRecorder is the mock recorder for MockProductStorage
-type MockProductStorageMockRecorder struct {
-	mock *MockProductStorage
+// ProductStorageMockRecorder is the mock recorder for ProductStorage
+type ProductStorageMockRecorder struct {
+	mock *ProductStorage
 }
 
-// NewMockProductStorage creates a new mock instance
-func NewMockProductStorage(ctrl *gomock.Controller) *MockProductStorage {
-	mock := &MockProductStorage{ctrl: ctrl}
-	mock.recorder = &MockProductStorageMockRecorder{mock}
+// NewProductStorage creates a new mock instance
+func NewProductStorage(ctrl *gomock.Controller) *ProductStorage {
+	mock := &ProductStorage{ctrl: ctrl}
+	mock.recorder = &ProductStorageMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockProductStorage) EXPECT() *MockProductStorageMockRecorder {
+func (m *ProductStorage) EXPECT() *ProductStorageMockRecorder {
 	return m.recorder
 }
 
 // Create mocks base method
-func (m *MockProductStorage) Create(arg0 context.Context, arg1 product.CreateRequest) (*product.Product, error) {
+func (m *ProductStorage) Create(arg0 context.Context, arg1 product.CreateRequest) (*product.Product, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", arg0, arg1)
 	ret0, _ := ret[0].(*product.Product)
@@ -44,13 +44,13 @@ func (m *MockProductStorage) Create(arg0 context.Context, arg1 product.CreateReq
 }
 
 // Create indicates an expected call of Create
-func (mr *MockProductStorageMockRecorder) Create(arg0, arg1 interface{}) *gomock.Call {
+func (mr *ProductStorageMockRecorder) Create(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockProductStorage)(nil).Create), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*ProductStorage)(nil).Create), arg0, arg1)
 }
 
 // Delete mocks base method
-func (m *MockProductStorage) Delete(arg0 context.Context, arg1 string) (*product.Product, error) {
+func (m *ProductStorage) Delete(arg0 context.Context, arg1 string) (*product.Product, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Delete", arg0, arg1)
 	ret0, _ := ret[0].(*product.Product)
@@ -59,13 +59,13 @@ func (m *MockProductStorage) Delete(arg0 context.Context, arg1 string) (*product
 }
 
 // Delete indicates an expected call of Delete
-func (mr *MockProductStorageMockRecorder) Delete(arg0, arg1 interface{}) *gomock.Call {
+func (mr *ProductStorageMockRecorder) Delete(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockProductStorage)(nil).Delete), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*ProductStorage)(nil).Delete), arg0, arg1)
 }
 
 // Get mocks base method
-func (m *MockProductStorage) Get(arg0 context.Context, arg1 string) (*product.Product, error) {
+func (m *ProductStorage) Get(arg0 context.Context, arg1 string) (*product.Product, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Get", arg0, arg1)
 	ret0, _ := ret[0].(*product.Product)
@@ -74,13 +74,13 @@ func (m *MockProductStorage) Get(arg0 context.Context, arg1 string) (*product.Pr
 }
 
 // Get indicates an expected call of Get
-func (mr *MockProductStorageMockRecorder) Get(arg0, arg1 interface{}) *gomock.Call {
+func (mr *ProductStorageMockRecorder) Get(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockProductStorage)(nil).Get), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*ProductStorage)(nil).Get), arg0, arg1)
 }
 
 // List mocks base method
-func (m *MockProductStorage) List(arg0 context.Context, arg1 product.ListRequest) ([]*product.Product, error) {
+func (m *ProductStorage) List(arg0 context.Context, arg1 product.ListRequest) ([]*product.Product, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "List", arg0, arg1)
 	ret0, _ := ret[0].([]*product.Product)
@@ -89,13 +89,13 @@ func (m *MockProductStorage) List(arg0 context.Context, arg1 product.ListRequest
 }
 
 // List indicates an expected call of List
-func (mr *MockProductStorageMockRecorder) List(arg0, arg1 interface{}) *gomock.Call {
+func (mr *ProductStorageMockRecorder) List(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockProductStorage)(nil).List), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*ProductStorage)(nil).List), arg0, arg1)
 }
 
 // Update mocks base method
-func (m *MockProductStorage) Update(arg0 context.Context, arg1 product.UpdateRequest) (*product.Product, error) {
+func (m *ProductStorage) Update(arg0 context.Context, arg1 product.UpdateRequest) (*product.Product, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", arg0, arg1)
 	ret0, _ := ret[0].(*product.Product)
@@ -104,7 +104,7 @@ func (m *MockProductStorage) Update(arg0 context.Context, arg1 product.UpdateReq
 }
 
 // Update indicates an expected call of Update
-func (mr *MockProductStorageMockRecorder) Update(arg0, arg1 interface{}) *gomock.Call {
+func (mr *ProductStorageMockRecorder) Update(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockProductStorage)(nil).Update), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*ProductStorage)(nil).Update), arg0, arg1)
 }

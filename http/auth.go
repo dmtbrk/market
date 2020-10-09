@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+//go:generate mockgen -destination=../mock/http_auth_service.go -package mock -mock_names=AuthService=HTTPAuthService . AuthService
+
 type AuthService interface {
 	Authorize(r *http.Request) (*user.User, error)
 }

@@ -2,7 +2,7 @@ package product
 
 import "context"
 
-//go:generate mockgen -destination=../../mock/product_storage.go -package mock -mock_names=Storage=MockProductStorage . Storage
+//go:generate mockgen -destination=../../mock/product_storage.go -package mock -mock_names=Storage=ProductStorage . Storage
 
 type Storage interface {
 	Lister

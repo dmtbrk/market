@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-type setupMockProductStorage func(m *mock.MockProductStorage)
+type setupMocks func(m *mock.ProductStorage)
 
 func TestService_Create(t *testing.T) {
 	type args struct {
@@ -22,7 +22,7 @@ func TestService_Create(t *testing.T) {
 	tests := []struct {
 		name                    string
 		args                    args
-		setupMockProductStorage setupMockProductStorage
+		setupMockProductStorage setupMocks
 		wantP                   *product.Product
 		wantErr                 bool
 	}{
@@ -32,7 +32,7 @@ func TestService_Create(t *testing.T) {
 				ctx: auth.NewContextWithUser(context.Background(), &user.User{ID: "1"}),
 				r:   product.CreateRequest{Name: "name", Price: 100},
 			},
-			setupMockProductStorage: func(m *mock.MockProductStorage) {
+			setupMockProductStorage: func(m *mock.ProductStorage) {
 				m.EXPECT().Create(
 					auth.NewContextWithUser(context.Background(), &user.User{ID: "1"}),
 					product.CreateRequest{Name: "name", Price: 100, Seller: "1"},
@@ -57,7 +57,7 @@ func TestService_Create(t *testing.T) {
 				ctx: auth.NewContextWithUser(context.Background(), &user.User{ID: "1"}),
 				r:   product.CreateRequest{Name: "name", Price: 100},
 			},
-			setupMockProductStorage: func(m *mock.MockProductStorage) {
+			setupMockProductStorage: func(m *mock.ProductStorage) {
 				m.EXPECT().Create(
 					auth.NewContextWithUser(context.Background(), &user.User{ID: "1"}),
 					product.CreateRequest{Name: "name", Price: 100, Seller: "1"},
@@ -74,7 +74,7 @@ func TestService_Create(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			storage := mock.NewMockProductStorage(ctrl)
+			storage := mock.NewProductStorage(ctrl)
 			if tt.setupMockProductStorage != nil {
 				tt.setupMockProductStorage(storage)
 			}
@@ -102,7 +102,7 @@ func TestService_Delete(t *testing.T) {
 	tests := []struct {
 		name                    string
 		args                    args
-		setupMockProductStorage setupMockProductStorage
+		setupMockProductStorage setupMocks
 		want                    *product.Product
 		wantErr                 bool
 	}{
@@ -112,7 +112,7 @@ func TestService_Delete(t *testing.T) {
 				ctx: auth.NewContextWithUser(context.Background(), &user.User{ID: "1"}),
 				id:  "1",
 			},
-			setupMockProductStorage: func(m *mock.MockProductStorage) {
+			setupMockProductStorage: func(m *mock.ProductStorage) {
 				m.EXPECT().Get(
 					auth.NewContextWithUser(context.Background(), &user.User{ID: "1"}),
 					"1",
@@ -137,7 +137,7 @@ func TestService_Delete(t *testing.T) {
 				ctx: auth.NewContextWithUser(context.Background(), &user.User{ID: "1"}),
 				id:  "1",
 			},
-			setupMockProductStorage: func(m *mock.MockProductStorage) {
+			setupMockProductStorage: func(m *mock.ProductStorage) {
 				m.EXPECT().Get(
 					auth.NewContextWithUser(context.Background(), &user.User{ID: "1"}),
 					"1",
@@ -162,7 +162,7 @@ func TestService_Delete(t *testing.T) {
 				ctx: auth.NewContextWithUser(context.Background(), &user.User{ID: "1"}),
 				id:  "1",
 			},
-			setupMockProductStorage: func(m *mock.MockProductStorage) {
+			setupMockProductStorage: func(m *mock.ProductStorage) {
 				m.EXPECT().Get(
 					auth.NewContextWithUser(context.Background(), &user.User{ID: "1"}),
 					"1",
@@ -179,7 +179,7 @@ func TestService_Delete(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			storage := mock.NewMockProductStorage(ctrl)
+			storage := mock.NewProductStorage(ctrl)
 			if tt.setupMockProductStorage != nil {
 				tt.setupMockProductStorage(storage)
 			}
@@ -207,7 +207,7 @@ func TestService_Get(t *testing.T) {
 	tests := []struct {
 		name                    string
 		args                    args
-		setupMockProductStorage setupMockProductStorage
+		setupMockProductStorage setupMocks
 		want                    *product.Product
 		wantErr                 bool
 	}{
@@ -217,7 +217,7 @@ func TestService_Get(t *testing.T) {
 				ctx: context.Background(),
 				id:  "1",
 			},
-			setupMockProductStorage: func(m *mock.MockProductStorage) {
+			setupMockProductStorage: func(m *mock.ProductStorage) {
 				m.EXPECT().Get(
 					context.Background(),
 					"1",
@@ -234,7 +234,7 @@ func TestService_Get(t *testing.T) {
 				ctx: context.Background(),
 				id:  "1",
 			},
-			setupMockProductStorage: func(m *mock.MockProductStorage) {
+			setupMockProductStorage: func(m *mock.ProductStorage) {
 				m.EXPECT().Get(
 					context.Background(),
 					"1",
@@ -251,7 +251,7 @@ func TestService_Get(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			storage := mock.NewMockProductStorage(ctrl)
+			storage := mock.NewProductStorage(ctrl)
 			if tt.setupMockProductStorage != nil {
 				tt.setupMockProductStorage(storage)
 			}
@@ -279,7 +279,7 @@ func TestService_List(t *testing.T) {
 	tests := []struct {
 		name                    string
 		args                    args
-		setupMockProductStorage setupMockProductStorage
+		setupMockProductStorage setupMocks
 		want                    []*product.Product
 		wantErr                 bool
 	}{
@@ -289,7 +289,7 @@ func TestService_List(t *testing.T) {
 				ctx: context.Background(),
 				r:   product.ListRequest{Offset: 2, Limit: 2},
 			},
-			setupMockProductStorage: func(m *mock.MockProductStorage) {
+			setupMockProductStorage: func(m *mock.ProductStorage) {
 				m.EXPECT().List(
 					context.Background(),
 					product.ListRequest{Offset: 2, Limit: 2},
@@ -312,7 +312,7 @@ func TestService_List(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			storage := mock.NewMockProductStorage(ctrl)
+			storage := mock.NewProductStorage(ctrl)
 			if tt.setupMockProductStorage != nil {
 				tt.setupMockProductStorage(storage)
 			}
@@ -338,11 +338,11 @@ func TestService_Update(t *testing.T) {
 		r   product.UpdateRequest
 	}
 	tests := []struct {
-		name                    string
-		args                    args
-		setupMockProductStorage setupMockProductStorage
-		want                    *product.Product
-		wantErr                 bool
+		name       string
+		args       args
+		setupMocks setupMocks
+		want       *product.Product
+		wantErr    bool
 	}{
 		{
 			name: "Should update product",
@@ -354,7 +354,7 @@ func TestService_Update(t *testing.T) {
 					Price: testInt64Ptr(100),
 				},
 			},
-			setupMockProductStorage: func(m *mock.MockProductStorage) {
+			setupMocks: func(m *mock.ProductStorage) {
 				m.EXPECT().Get(
 					auth.NewContextWithUser(context.Background(), &user.User{ID: "1"}),
 					"1",
@@ -387,7 +387,7 @@ func TestService_Update(t *testing.T) {
 					Price: testInt64Ptr(100),
 				},
 			},
-			setupMockProductStorage: func(m *mock.MockProductStorage) {
+			setupMocks: func(m *mock.ProductStorage) {
 				m.EXPECT().Get(
 					auth.NewContextWithUser(context.Background(), &user.User{ID: "1"}),
 					"1",
@@ -416,9 +416,9 @@ func TestService_Update(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			storage := mock.NewMockProductStorage(ctrl)
-			if tt.setupMockProductStorage != nil {
-				tt.setupMockProductStorage(storage)
+			storage := mock.NewProductStorage(ctrl)
+			if tt.setupMocks != nil {
+				tt.setupMocks(storage)
 			}
 
 			s := &product.Service{
