@@ -4,14 +4,27 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/ortymid/market/market/product"
 )
 
-type jsonObject map[string]interface{}
+type indexResponse struct {
+	ID     string `json:"_id"`
+	Result string `json:"result"`
+}
+
+type updateResponse struct {
+	ID     string      `json:"_id"`
+	Result string      `json:"result"`
+	Get    getResponse `json:"get"`
+}
+
+type getResponse struct {
+	Found  bool   `json:"found"`
+	Source source `json:"_source"`
+}
 
 type searchResponse struct {
 	Hits hits `json:"hits"`
@@ -43,9 +56,9 @@ func NewProductStorage(es *elasticsearch.Client, index string) *ProductStorage {
 
 func (s *ProductStorage) List(ctx context.Context, r product.ListRequest) ([]*product.Product, error) {
 	var b bytes.Buffer
-	query := jsonObject{
-		"query": jsonObject{
-			"match_all": jsonObject{},
+	query := map[string]interface{}{
+		"query": map[string]interface{}{
+			"match_all": map[string]interface{}{},
 		},
 		"from": r.Offset,
 		"size": r.Limit,
@@ -65,12 +78,12 @@ func (s *ProductStorage) List(ctx context.Context, r product.ListRequest) ([]*pr
 	defer res.Body.Close()
 
 	if res.IsError() {
-		var e jsonObject
+		var e map[string]interface{}
 		if err := json.NewDecoder(res.Body).Decode(&e); err != nil {
 			return nil, fmt.Errorf("parsing elasticsearch response body: %w", err)
 		}
 
-		reason, _ := e["error"].(jsonObject)["reason"] // TODO: handle no reason situation
+		reason, _ := e["error"].(map[string]interface{})["reason"] // TODO: handle no reason situation
 
 		return nil, fmt.Errorf("searching: %s", reason)
 	}
@@ -96,7 +109,40 @@ func (s *ProductStorage) List(ctx context.Context, r product.ListRequest) ([]*pr
 }
 
 func (s *ProductStorage) Get(ctx context.Context, id string) (*product.Product, error) {
-	panic("implement me")
+	req := esapi.GetRequest{
+		Index:      s.index,
+		DocumentID: id,
+	}
+
+	res, err := req.Do(ctx, s.es)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	if res.IsError() {
+		if res.StatusCode == 404 {
+			return nil, product.ErrNotFound
+		}
+		return nil, fmt.Errorf("elasticsearch: %s", res.Status())
+	}
+
+	var gr getResponse
+	if err := json.NewDecoder(res.Body).Decode(&gr); err != nil {
+		return nil, fmt.Errorf("parsing elasticseach response body: %w", err)
+	}
+
+	if !gr.Found {
+		return nil, product.ErrNotFound
+	}
+
+	p := &product.Product{
+		ID:     id,
+		Name:   gr.Source.Name,
+		Price:  gr.Source.Price,
+		Seller: gr.Source.Seller,
+	}
+	return p, nil
 }
 
 func (s *ProductStorage) Create(ctx context.Context, r product.CreateRequest) (*product.Product, error) {
@@ -112,27 +158,25 @@ func (s *ProductStorage) Create(ctx context.Context, r product.CreateRequest) (*
 
 	res, err := req.Do(ctx, s.es)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("making elasticsearch request: %w", err)
 	}
 	defer res.Body.Close()
 
 	if res.IsError() {
-		return nil, errors.New("cannot create product") // TODO: add elasticseach error description
+		return nil, fmt.Errorf("elasticsearch: %s", res.Status())
 	}
 
-	var rm map[string]interface{}
-	if err := json.NewDecoder(res.Body).Decode(&r); err != nil {
+	var ir indexResponse
+	if err := json.NewDecoder(res.Body).Decode(&ir); err != nil {
 		return nil, fmt.Errorf("parsing elasticseach response body: %w", err)
 	}
 
-	if rm["result"] != "created" {
-		return nil, errors.New("not created")
+	if ir.Result != "created" {
+		return nil, fmt.Errorf("not created, result: %s", ir.Result)
 	}
 
-	id, _ := rm["_id"].(string) // TODO: handle no id situation
-
 	p := &product.Product{
-		ID:     id,
+		ID:     ir.ID,
 		Name:   r.Name,
 		Price:  r.Price,
 		Seller: r.Seller,
@@ -141,9 +185,70 @@ func (s *ProductStorage) Create(ctx context.Context, r product.CreateRequest) (*
 }
 
 func (s *ProductStorage) Update(ctx context.Context, r product.UpdateRequest) (*product.Product, error) {
-	panic("implement me")
+	var buf bytes.Buffer
+	b := map[string]interface{}{
+		"doc": r,
+	}
+	err := json.NewEncoder(&buf).Encode(b)
+	if err != nil {
+		return nil, fmt.Errorf("encoding elasticsearch request: %w", err)
+	}
+
+	req := esapi.UpdateRequest{
+		Index:          s.index,
+		DocumentID:     r.ID,
+		Body:           &buf,
+		SourceIncludes: []string{"name", "price", "seller"},
+	}
+
+	res, err := req.Do(ctx, s.es)
+	if err != nil {
+		return nil, fmt.Errorf("making elasticsearch request: %w", err)
+	}
+
+	if res.IsError() {
+		if res.StatusCode == 404 {
+			return nil, product.ErrNotFound
+		}
+		return nil, fmt.Errorf("elasticsearch: %s", res.Status())
+	}
+
+	var ur updateResponse
+	if err := json.NewDecoder(res.Body).Decode(&ur); err != nil {
+		return nil, fmt.Errorf("parsing elasticseach response body: %w", err)
+	}
+
+	p := &product.Product{
+		ID:     ur.ID,
+		Name:   ur.Get.Source.Name,
+		Price:  ur.Get.Source.Price,
+		Seller: ur.Get.Source.Seller,
+	}
+	return p, nil
 }
 
 func (s *ProductStorage) Delete(ctx context.Context, id string) (*product.Product, error) {
-	panic("implement me")
+	p, err := s.Get(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	req := esapi.DeleteRequest{
+		Index:      s.index,
+		DocumentID: id,
+	}
+
+	res, err := req.Do(ctx, s.es)
+	if err != nil {
+		return nil, fmt.Errorf("making elasticsearch request: %w", err)
+	}
+
+	if res.IsError() {
+		if res.StatusCode == 404 {
+			return nil, product.ErrNotFound
+		}
+		return nil, fmt.Errorf("elasticsearch: %s", res.Status())
+	}
+
+	return p, nil
 }

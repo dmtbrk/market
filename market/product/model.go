@@ -19,7 +19,7 @@ type CreateRequest struct {
 }
 
 type UpdateRequest struct {
-	ID    string  `bson:"-"`               // Required to find the product.
-	Name  *string `bson:"name,omitempty"`  // Optional.
-	Price *int64  `bson:"price,omitempty"` // Optional.
+	ID    string  `json:"-" bson:"-"`                             // Required to find the product.
+	Name  *string `json:"name,omitempty" bson:"name,omitempty"`   // Optional.
+	Price *int64  `json:"price,omitempty" bson:"price,omitempty"` // Optional.
 }

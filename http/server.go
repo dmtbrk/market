@@ -19,7 +19,7 @@ type Server struct {
 	ProductService product.Interface
 }
 
-func (s *Server) handler() http.Handler {
+func (s *Server) Handler() http.Handler {
 	r := mux.NewRouter()
 
 	// Product
@@ -42,7 +42,7 @@ func (s *Server) handler() http.Handler {
 func (s *Server) Run(addr string) {
 	httpServer := http.Server{
 		Addr:    addr,
-		Handler: s.handler(),
+		Handler: s.Handler(),
 	}
 
 	wait := make(chan struct{})
