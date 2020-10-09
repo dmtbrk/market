@@ -7,6 +7,8 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
+//go:generate mockgen -destination=../mock/grpc_auth_service.go -package mock -mock_names=AuthService=GRPCAuthService . AuthService
+
 type AuthService interface {
 	Authorize(ctx context.Context, md metadata.MD) (*user.User, error)
 	MetadataWithAuthorization(ctx context.Context, u *user.User) (metadata.MD, error)
