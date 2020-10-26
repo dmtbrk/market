@@ -41,7 +41,7 @@ func (s *ProductService) Connect(ctx context.Context, addr string) error {
 	return nil
 }
 
-func (s *ProductService) List(ctx context.Context, r product.ListRequest) ([]*product.Product, error) {
+func (s *ProductService) Find(ctx context.Context, r product.FindRequest) ([]*product.Product, error) {
 	req := &pb.ListRequest{
 		Offset: r.Offset,
 		Limit:  r.Limit,
@@ -75,7 +75,7 @@ func (s *ProductService) List(ctx context.Context, r product.ListRequest) ([]*pr
 	return products, nil
 }
 
-func (s *ProductService) Get(ctx context.Context, id string) (*product.Product, error) {
+func (s *ProductService) FindOne(ctx context.Context, id string) (*product.Product, error) {
 	req := &pb.GetRequest{
 		Id: id,
 	}

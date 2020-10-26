@@ -17,7 +17,7 @@ func NewProductStorage(col *mongo.Collection) *ProductStorage {
 	return &ProductStorage{col: col}
 }
 
-func (s *ProductStorage) List(ctx context.Context, r product.ListRequest) ([]*product.Product, error) {
+func (s *ProductStorage) Find(ctx context.Context, r product.FindRequest) ([]*product.Product, error) {
 	opts := options.Find().SetSkip(r.Offset).SetLimit(r.Limit)
 	cur, err := s.col.Find(ctx, bson.D{}, opts)
 	if err != nil {
@@ -41,7 +41,7 @@ func (s *ProductStorage) List(ctx context.Context, r product.ListRequest) ([]*pr
 	return ps, nil
 }
 
-func (s *ProductStorage) Get(ctx context.Context, id string) (*product.Product, error) {
+func (s *ProductStorage) FindOne(ctx context.Context, id string) (*product.Product, error) {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err

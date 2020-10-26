@@ -16,8 +16,13 @@ type Service struct {
 	cacheSecret interface{}
 }
 
-func (s *Service) Authorize(ctx context.Context, token string) (*user.User, error) {
-	claims, err := Parse(token, s.SecretFunc(ctx))
+func (s *Service) Authorize(ctx context.Context, token interface{}) (*user.User, error) {
+	tokenString, ok := token.(string)
+	if !ok {
+		return nil, nil
+	}
+
+	claims, err := Parse(tokenString, s.SecretContext(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -25,7 +30,7 @@ func (s *Service) Authorize(ctx context.Context, token string) (*user.User, erro
 	return &user.User{ID: claims.UserID}, nil
 }
 
-func (s *Service) SecretFunc(ctx context.Context) func() (interface{}, error) {
+func (s *Service) SecretContext(ctx context.Context) func() (interface{}, error) {
 	return func() (interface{}, error) {
 		if s.cacheSecret == nil {
 			secret, err := s.fetchSecret(ctx)

@@ -64,34 +64,34 @@ func (mr *ProductStorageMockRecorder) Delete(arg0, arg1 interface{}) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*ProductStorage)(nil).Delete), arg0, arg1)
 }
 
-// Get mocks base method
-func (m *ProductStorage) Get(arg0 context.Context, arg1 string) (*product.Product, error) {
+// Find mocks base method
+func (m *ProductStorage) Find(arg0 context.Context, arg1 product.FindRequest) ([]*product.Product, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Get", arg0, arg1)
-	ret0, _ := ret[0].(*product.Product)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Get indicates an expected call of Get
-func (mr *ProductStorageMockRecorder) Get(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*ProductStorage)(nil).Get), arg0, arg1)
-}
-
-// List mocks base method
-func (m *ProductStorage) List(arg0 context.Context, arg1 product.ListRequest) ([]*product.Product, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "List", arg0, arg1)
+	ret := m.ctrl.Call(m, "Find", arg0, arg1)
 	ret0, _ := ret[0].([]*product.Product)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// List indicates an expected call of List
-func (mr *ProductStorageMockRecorder) List(arg0, arg1 interface{}) *gomock.Call {
+// Find indicates an expected call of Find
+func (mr *ProductStorageMockRecorder) Find(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*ProductStorage)(nil).List), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Find", reflect.TypeOf((*ProductStorage)(nil).Find), arg0, arg1)
+}
+
+// FindOne mocks base method
+func (m *ProductStorage) FindOne(arg0 context.Context, arg1 string) (*product.Product, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindOne", arg0, arg1)
+	ret0, _ := ret[0].(*product.Product)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindOne indicates an expected call of FindOne
+func (mr *ProductStorageMockRecorder) FindOne(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOne", reflect.TypeOf((*ProductStorage)(nil).FindOne), arg0, arg1)
 }
 
 // Update mocks base method

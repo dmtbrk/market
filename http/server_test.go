@@ -30,11 +30,11 @@ func TestServer(t *testing.T) {
 			name: "Should return products for offset=0 and limit=2",
 			req:  httptest.NewRequest(http.MethodGet, "/products/?offset=0&limit=2", nil),
 			setupMocks: func(as *mock.HTTPAuthService, ps *mock.ProductService) {
-				as.EXPECT().Authorize(gomock.Any()).Return(nil, nil)
+				as.EXPECT().Authorize(gomock.Any(), gomock.Any()).Return(nil, nil)
 
-				ps.EXPECT().List(
+				ps.EXPECT().Find(
 					gomock.Any(),
-					product.ListRequest{Offset: 0, Limit: 2},
+					product.FindRequest{Offset: 0, Limit: 2},
 				).Return(
 					[]*product.Product{
 						{ID: "1", Name: "p1", Price: 100, Seller: "1"},
@@ -55,9 +55,9 @@ func TestServer(t *testing.T) {
 			name: "Should return product",
 			req:  httptest.NewRequest(http.MethodGet, "/products/1", nil),
 			setupMocks: func(as *mock.HTTPAuthService, ps *mock.ProductService) {
-				as.EXPECT().Authorize(gomock.Any()).Return(nil, nil)
+				as.EXPECT().Authorize(gomock.Any(), gomock.Any()).Return(nil, nil)
 
-				ps.EXPECT().Get(
+				ps.EXPECT().FindOne(
 					gomock.Any(),
 					"1",
 				).Return(
@@ -81,7 +81,7 @@ func TestServer(t *testing.T) {
 				})),
 			),
 			setupMocks: func(as *mock.HTTPAuthService, ps *mock.ProductService) {
-				as.EXPECT().Authorize(gomock.Any()).Return(&user.User{ID: "1"}, nil)
+				as.EXPECT().Authorize(gomock.Any(), gomock.Any()).Return(&user.User{ID: "1"}, nil)
 
 				ps.EXPECT().Create(
 					gomock.Any(),
@@ -109,7 +109,7 @@ func TestServer(t *testing.T) {
 				})),
 			),
 			setupMocks: func(as *mock.HTTPAuthService, ps *mock.ProductService) {
-				as.EXPECT().Authorize(gomock.Any()).Return(&user.User{ID: "1"}, nil)
+				as.EXPECT().Authorize(gomock.Any(), gomock.Any()).Return(&user.User{ID: "1"}, nil)
 
 				ps.EXPECT().Update(
 					gomock.Any(),
@@ -135,7 +135,7 @@ func TestServer(t *testing.T) {
 				nil,
 			),
 			setupMocks: func(as *mock.HTTPAuthService, ps *mock.ProductService) {
-				as.EXPECT().Authorize(gomock.Any()).Return(&user.User{ID: "1"}, nil)
+				as.EXPECT().Authorize(gomock.Any(), gomock.Any()).Return(&user.User{ID: "1"}, nil)
 
 				ps.EXPECT().Delete(
 					gomock.Any(),

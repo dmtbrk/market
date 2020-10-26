@@ -54,11 +54,16 @@ func NewProductStorage(es *elasticsearch.Client, index string) *ProductStorage {
 	return &ProductStorage{es: es, index: index}
 }
 
-func (s *ProductStorage) List(ctx context.Context, r product.ListRequest) ([]*product.Product, error) {
+func (s *ProductStorage) Find(ctx context.Context, r product.FindRequest) ([]*product.Product, error) {
 	var b bytes.Buffer
 	query := map[string]interface{}{
 		"query": map[string]interface{}{
 			"match_all": map[string]interface{}{},
+			//"match": map[string]interface{}{
+			//	"name": map[string]interface{}{
+			//		"query": r.Name,
+			//	},
+			//},
 		},
 		"from": r.Offset,
 		"size": r.Limit,
@@ -108,7 +113,7 @@ func (s *ProductStorage) List(ctx context.Context, r product.ListRequest) ([]*pr
 	return ps, nil
 }
 
-func (s *ProductStorage) Get(ctx context.Context, id string) (*product.Product, error) {
+func (s *ProductStorage) FindOne(ctx context.Context, id string) (*product.Product, error) {
 	req := esapi.GetRequest{
 		Index:      s.index,
 		DocumentID: id,
@@ -228,7 +233,7 @@ func (s *ProductStorage) Update(ctx context.Context, r product.UpdateRequest) (*
 }
 
 func (s *ProductStorage) Delete(ctx context.Context, id string) (*product.Product, error) {
-	p, err := s.Get(ctx, id)
+	p, err := s.FindOne(ctx, id)
 	if err != nil {
 		return nil, err
 	}

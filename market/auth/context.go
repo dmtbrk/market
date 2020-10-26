@@ -24,3 +24,11 @@ func UserFromContext(ctx context.Context) (*user.User, error) {
 	}
 	return u, nil
 }
+
+func NewContextWithToken(ctx context.Context, token interface{}) context.Context {
+	return context.WithValue(ctx, ContextKeyToken, token)
+}
+
+func TokenFromContext(ctx context.Context) interface{} {
+	return ctx.Value(ContextKeyToken)
+}

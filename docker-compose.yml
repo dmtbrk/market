@@ -19,9 +19,10 @@ services:
     ports:
       - ${MARKET_GRPC_PORT}:${MARKET_GRPC_PORT}
     depends_on:
-      - redis
-      - postgres
-      - mongo
+      #      - redis
+      #      - postgres
+      #      - mongo
+      - elasticsearch
 
   user-auth_service:
     image: aiexmoran/httpcrud:2
@@ -29,21 +30,21 @@ services:
     ports:
       - ${SERVER_PORT}:${SERVER_PORT}
 
-  redis:
-    image: redis:alpine
-
-  postgres:
-    image: postgres
-    environment:
-      - POSTGRES_PASSWORD=postgres
-    volumes:
-      - "./scripts/postgres:/docker-entrypoint-initdb.d/"
-
-  mongo:
-    image: mongo
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: mongo
-      MONGO_INITDB_ROOT_PASSWORD: mongo
+  #  redis:
+  #    image: redis:alpine
+  #
+  #  postgres:
+  #    image: postgres
+  #    environment:
+  #      - POSTGRES_PASSWORD=postgres
+  #    volumes:
+  #      - "./scripts/postgres:/docker-entrypoint-initdb.d/"
+  #
+  #  mongo:
+  #    image: mongo
+  #    environment:
+  #      MONGO_INITDB_ROOT_USERNAME: mongo
+  #      MONGO_INITDB_ROOT_PASSWORD: mongo
 
   elasticsearch:
     image: elasticsearch:7.9.2

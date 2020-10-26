@@ -1,4 +1,4 @@
-package route
+package handler
 
 import (
 	"encoding/json"
@@ -8,30 +8,30 @@ import (
 	"strconv"
 )
 
-type Product struct {
+type Products struct {
 	ProductService product.Interface
 }
 
-func (pr *Product) Setup(r *mux.Router) {
+func (h *Products) Setup(r *mux.Router) {
 	// List
-	r.HandleFunc("/products", pr.List).Methods(http.MethodGet)
-	r.HandleFunc("/products/", pr.List).Methods(http.MethodGet)
+	r.HandleFunc("/products", h.List).Methods(http.MethodGet)
+	r.HandleFunc("/products/", h.List).Methods(http.MethodGet)
 	// Detail
-	r.HandleFunc("/products/{id}", pr.Detail).Methods(http.MethodGet)
-	r.HandleFunc("/products/{id}/", pr.Detail).Methods(http.MethodGet)
+	r.HandleFunc("/products/{id}", h.Detail).Methods(http.MethodGet)
+	r.HandleFunc("/products/{id}/", h.Detail).Methods(http.MethodGet)
 	// Create
-	r.HandleFunc("/products", pr.Create).Methods(http.MethodPost)
-	r.HandleFunc("/products/", pr.Create).Methods(http.MethodPost)
+	r.HandleFunc("/products", h.Create).Methods(http.MethodPost)
+	r.HandleFunc("/products/", h.Create).Methods(http.MethodPost)
 	// Update
-	r.HandleFunc("/products/{id}", pr.Update).Methods(http.MethodPatch)
-	r.HandleFunc("/products/{id}/", pr.Update).Methods(http.MethodPatch)
+	r.HandleFunc("/products/{id}", h.Update).Methods(http.MethodPatch)
+	r.HandleFunc("/products/{id}/", h.Update).Methods(http.MethodPatch)
 	// Delete
-	r.HandleFunc("/products/{id}", pr.Delete).Methods(http.MethodDelete)
-	r.HandleFunc("/products/{id}/", pr.Delete).Methods(http.MethodDelete)
+	r.HandleFunc("/products/{id}", h.Delete).Methods(http.MethodDelete)
+	r.HandleFunc("/products/{id}/", h.Delete).Methods(http.MethodDelete)
 
 }
 
-func (pr *Product) List(w http.ResponseWriter, r *http.Request) {
+func (h *Products) List(w http.ResponseWriter, r *http.Request) {
 	params := r.URL.Query()
 	offset, err := strconv.ParseInt(params.Get("offset"), 10, 64)
 	if err != nil {
@@ -44,12 +44,12 @@ func (pr *Product) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	lr := product.ListRequest{
+	lr := product.FindRequest{
 		Offset: offset,
 		Limit:  limit,
 	}
 
-	p, err := pr.ProductService.List(r.Context(), lr)
+	p, err := h.ProductService.Find(r.Context(), lr)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -64,10 +64,10 @@ func (pr *Product) List(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (pr *Product) Detail(w http.ResponseWriter, r *http.Request) {
+func (h *Products) Detail(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 
-	p, err := pr.ProductService.Get(r.Context(), id)
+	p, err := h.ProductService.FindOne(r.Context(), id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -82,7 +82,7 @@ func (pr *Product) Detail(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (pr *Product) Create(w http.ResponseWriter, r *http.Request) {
+func (h *Products) Create(w http.ResponseWriter, r *http.Request) {
 	var cr product.CreateRequest
 
 	err := json.NewDecoder(r.Body).Decode(&cr)
@@ -91,7 +91,7 @@ func (pr *Product) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p, err := pr.ProductService.Create(r.Context(), cr)
+	p, err := h.ProductService.Create(r.Context(), cr)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -106,7 +106,7 @@ func (pr *Product) Create(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (pr *Product) Update(w http.ResponseWriter, r *http.Request) {
+func (h *Products) Update(w http.ResponseWriter, r *http.Request) {
 	var ur product.UpdateRequest
 
 	err := json.NewDecoder(r.Body).Decode(&ur)
@@ -118,7 +118,7 @@ func (pr *Product) Update(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	ur.ID = id
 
-	p, err := pr.ProductService.Update(r.Context(), ur)
+	p, err := h.ProductService.Update(r.Context(), ur)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -133,10 +133,10 @@ func (pr *Product) Update(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (pr *Product) Delete(w http.ResponseWriter, r *http.Request) {
+func (h *Products) Delete(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 
-	p, err := pr.ProductService.Delete(r.Context(), id)
+	p, err := h.ProductService.Delete(r.Context(), id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

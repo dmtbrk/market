@@ -16,7 +16,7 @@ func NewProductStorage(db *sql.DB, table string) *ProductStorage {
 	return &ProductStorage{db: db, table: table}
 }
 
-func (s *ProductStorage) List(ctx context.Context, r product.ListRequest) ([]*product.Product, error) {
+func (s *ProductStorage) Find(ctx context.Context, r product.FindRequest) ([]*product.Product, error) {
 	query := fmt.Sprintf(
 		`SELECT id, name, price, seller FROM %s LIMIT $1 OFFSET $2`,
 		s.table,
@@ -55,7 +55,7 @@ func (s *ProductStorage) List(ctx context.Context, r product.ListRequest) ([]*pr
 	return ps, nil
 }
 
-func (s *ProductStorage) Get(ctx context.Context, id string) (p *product.Product, err error) {
+func (s *ProductStorage) FindOne(ctx context.Context, id string) (p *product.Product, err error) {
 	query := fmt.Sprintf(
 		`SELECT id, name, price, seller FROM %s WHERE id = $1`,
 		s.table,
@@ -98,7 +98,7 @@ func (s *ProductStorage) Create(ctx context.Context, r product.CreateRequest) (p
 }
 
 func (s *ProductStorage) Update(ctx context.Context, r product.UpdateRequest) (*product.Product, error) {
-	p, err := s.Get(ctx, r.ID)
+	p, err := s.FindOne(ctx, r.ID)
 	if err != nil {
 		return nil, err
 	}

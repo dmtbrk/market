@@ -2,7 +2,7 @@ package http
 
 import (
 	"context"
-	"github.com/ortymid/market/http/route"
+	"github.com/ortymid/market/http/handler"
 	"github.com/ortymid/market/market/product"
 	"github.com/rs/cors"
 	"log"
@@ -22,13 +22,13 @@ type Server struct {
 func (s *Server) Handler() http.Handler {
 	r := mux.NewRouter()
 
-	// Product
-	products := route.Product{ProductService: s.ProductService}
+	// Products
+	products := handler.Products{ProductService: s.ProductService}
 	products.Setup(r)
 
 	// GraphQL
-	gql := route.GraphQL{ProductService: s.ProductService}
-	gql.Setup(r.PathPrefix("/gql/").Subrouter())
+	gql := handler.GraphQL{ProductService: s.ProductService}
+	gql.Setup(r)
 
 	// CORS
 	h := cors.Default().Handler(r)

@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"errors"
 	"github.com/ortymid/market/jwt"
 	"github.com/ortymid/market/market/user"
@@ -11,7 +12,7 @@ import (
 //go:generate mockgen -destination=../mock/http_auth_service.go -package mock -mock_names=AuthService=HTTPAuthService . AuthService
 
 type AuthService interface {
-	Authorize(r *http.Request) (*user.User, error)
+	Authorize(ctx context.Context, r *http.Request) (*user.User, error)
 }
 
 type JWTAuthService struct {
@@ -22,7 +23,7 @@ func NewJWTAuthService(url string) *JWTAuthService {
 	return &JWTAuthService{jwtService: jwt.Service{URL: url}}
 }
 
-func (s *JWTAuthService) Authorize(r *http.Request) (*user.User, error) {
+func (s *JWTAuthService) Authorize(ctx context.Context, r *http.Request) (*user.User, error) {
 	tokenString, err := getTokenString(r)
 	if err != nil {
 		return nil, err
@@ -33,7 +34,7 @@ func (s *JWTAuthService) Authorize(r *http.Request) (*user.User, error) {
 		return nil, nil
 	}
 
-	return s.jwtService.Authorize(r.Context(), tokenString)
+	return s.jwtService.Authorize(ctx, tokenString)
 }
 
 // getTokenString looks for JWT in the Authorization header.

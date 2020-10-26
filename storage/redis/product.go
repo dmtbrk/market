@@ -22,7 +22,7 @@ func NewProductStorage(rdb *redis.Client, key string) *ProductStorage {
 	return &ProductStorage{rdb: rdb, baseKey: key, idsKey: idsKey}
 }
 
-func (s *ProductStorage) List(ctx context.Context, r product.ListRequest) ([]*product.Product, error) {
+func (s *ProductStorage) Find(ctx context.Context, r product.FindRequest) ([]*product.Product, error) {
 	start, stop := r.Offset, r.Offset+r.Limit-1
 
 	ids, err := s.rdb.ZRange(ctx, s.idsKey, start, stop).Result()
@@ -43,12 +43,12 @@ func (s *ProductStorage) List(ctx context.Context, r product.ListRequest) ([]*pr
 	return products, nil
 }
 
-func (s *ProductStorage) Get(ctx context.Context, id string) (*product.Product, error) {
+func (s *ProductStorage) FindOne(ctx context.Context, id string) (*product.Product, error) {
 	return s.getProductFromHash(ctx, id)
 }
 
 func (s *ProductStorage) Create(ctx context.Context, r product.CreateRequest) (*product.Product, error) {
-	// Get new id.
+	// FindOne new id.
 	id, err := s.rdb.Incr(ctx, fmt.Sprintf("%s:id", s.baseKey)).Result()
 	if err != nil {
 		return nil, fmt.Errorf("getting new id: %w", err)
@@ -87,7 +87,7 @@ func (s *ProductStorage) Create(ctx context.Context, r product.CreateRequest) (*
 }
 
 func (s *ProductStorage) Update(ctx context.Context, r product.UpdateRequest) (*product.Product, error) {
-	// Get product checking for existence.
+	// FindOne product checking for existence.
 	p, err := s.getProductFromHash(ctx, r.ID)
 	if err != nil {
 		return nil, err
@@ -111,7 +111,7 @@ func (s *ProductStorage) Update(ctx context.Context, r product.UpdateRequest) (*
 }
 
 func (s *ProductStorage) Delete(ctx context.Context, id string) (*product.Product, error) {
-	// Get product checking for existence.
+	// FindOne product checking for existence.
 	p, err := s.getProductFromHash(ctx, id)
 	if err != nil {
 		return nil, err

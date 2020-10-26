@@ -437,13 +437,13 @@ var file_product_proto_goTypes = []interface{}{
 	(*ProductReply)(nil),  // 5: pb.ProductReply
 }
 var file_product_proto_depIdxs = []int32{
-	0, // 0: pb.ProductService.List:input_type -> pb.ListRequest
-	1, // 1: pb.ProductService.Get:input_type -> pb.GetRequest
+	0, // 0: pb.ProductService.Find:input_type -> pb.ListRequest
+	1, // 1: pb.ProductService.FindOne:input_type -> pb.GetRequest
 	2, // 2: pb.ProductService.Create:input_type -> pb.CreateRequest
 	3, // 3: pb.ProductService.Update:input_type -> pb.UpdateRequest
 	4, // 4: pb.ProductService.Delete:input_type -> pb.DeleteRequest
-	5, // 5: pb.ProductService.List:output_type -> pb.ProductReply
-	5, // 6: pb.ProductService.Get:output_type -> pb.ProductReply
+	5, // 5: pb.ProductService.Find:output_type -> pb.ProductReply
+	5, // 6: pb.ProductService.FindOne:output_type -> pb.ProductReply
 	5, // 7: pb.ProductService.Create:output_type -> pb.ProductReply
 	5, // 8: pb.ProductService.Update:output_type -> pb.ProductReply
 	5, // 9: pb.ProductService.Delete:output_type -> pb.ProductReply
@@ -582,7 +582,7 @@ func NewProductServiceClient(cc grpc.ClientConnInterface) ProductServiceClient {
 }
 
 func (c *productServiceClient) List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (ProductService_ListClient, error) {
-	stream, err := c.cc.NewStream(ctx, &_ProductService_serviceDesc.Streams[0], "/pb.ProductService/List", opts...)
+	stream, err := c.cc.NewStream(ctx, &_ProductService_serviceDesc.Streams[0], "/pb.ProductService/Find", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -615,7 +615,7 @@ func (x *productServiceListClient) Recv() (*ProductReply, error) {
 
 func (c *productServiceClient) Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*ProductReply, error) {
 	out := new(ProductReply)
-	err := c.cc.Invoke(ctx, "/pb.ProductService/Get", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/pb.ProductService/FindOne", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -663,10 +663,10 @@ type UnimplementedProductServiceServer struct {
 }
 
 func (*UnimplementedProductServiceServer) List(*ListRequest, ProductService_ListServer) error {
-	return status.Errorf(codes.Unimplemented, "method List not implemented")
+	return status.Errorf(codes.Unimplemented, "method Find not implemented")
 }
 func (*UnimplementedProductServiceServer) Get(context.Context, *GetRequest) (*ProductReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
+	return nil, status.Errorf(codes.Unimplemented, "method FindOne not implemented")
 }
 func (*UnimplementedProductServiceServer) Create(context.Context, *CreateRequest) (*ProductReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
@@ -713,7 +713,7 @@ func _ProductService_Get_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/pb.ProductService/Get",
+		FullMethod: "/pb.ProductService/FindOne",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ProductServiceServer).Get(ctx, req.(*GetRequest))
@@ -780,7 +780,7 @@ var _ProductService_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*ProductServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Get",
+			MethodName: "FindOne",
 			Handler:    _ProductService_Get_Handler,
 		},
 		{
@@ -798,7 +798,7 @@ var _ProductService_serviceDesc = grpc.ServiceDesc{
 	},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "List",
+			StreamName:    "Find",
 			Handler:       _ProductService_List_Handler,
 			ServerStreams: true,
 		},

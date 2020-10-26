@@ -1,4 +1,4 @@
-package route
+package handler
 
 import (
 	"fmt"
@@ -20,11 +20,11 @@ func (g *GraphQL) Setup(r *mux.Router) {
 		ProductService: g.ProductService,
 	}}))
 
-	rt := r.Handle("/", gqlSrv)
+	rt := r.Handle("/gql", gqlSrv)
 	url, err := rt.URL()
 	if err != nil {
-		panic(fmt.Errorf("obtaining GraphQL route url: %w", err))
+		panic(fmt.Errorf("obtaining GraphQL handler url: %w", err))
 	}
 
-	r.Handle("/play", playground.Handler("GQLP", url.Path))
+	r.Handle("/gql/play", playground.Handler("GQLP", url.Path))
 }

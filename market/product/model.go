@@ -7,9 +7,10 @@ type Product struct {
 	Seller string `json:"seller"`
 }
 
-type ListRequest struct {
+type FindRequest struct {
 	Offset int64
 	Limit  int64
+	Name   string
 }
 
 type CreateRequest struct {

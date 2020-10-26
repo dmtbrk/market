@@ -65,12 +65,12 @@ func (r *mutationResolver) DeleteProduct(ctx context.Context, id string) (*model
 }
 
 func (r *queryResolver) Products(ctx context.Context, offset int64, limit int64) ([]*model.Product, error) {
-	req := product.ListRequest{
+	req := product.FindRequest{
 		Offset: offset,
 		Limit:  limit,
 	}
 
-	products, err := r.ProductService.List(ctx, req)
+	products, err := r.ProductService.Find(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +88,7 @@ func (r *queryResolver) Products(ctx context.Context, offset int64, limit int64)
 }
 
 func (r *queryResolver) Product(ctx context.Context, id string) (*model.Product, error) {
-	p, err := r.ProductService.Get(ctx, id)
+	p, err := r.ProductService.FindOne(ctx, id)
 	if err != nil {
 		return nil, err
 	}

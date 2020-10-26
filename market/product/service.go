@@ -11,8 +11,8 @@ type Service struct {
 }
 
 // List returns a list of products for the given request.
-func (s *Service) List(ctx context.Context, r ListRequest) ([]*Product, error) {
-	ps, err := s.Storage.List(ctx, r)
+func (s *Service) Find(ctx context.Context, r FindRequest) ([]*Product, error) {
+	ps, err := s.Storage.Find(ctx, r)
 	if err != nil {
 		return nil, fmt.Errorf("list products: %w", err)
 	}
@@ -22,8 +22,8 @@ func (s *Service) List(ctx context.Context, r ListRequest) ([]*Product, error) {
 
 // Get returns a product for the given id. It returns product.ErrNotFound error if
 // there is no product with such id.
-func (s *Service) Get(ctx context.Context, id string) (*Product, error) {
-	p, err := s.Storage.Get(ctx, id)
+func (s *Service) FindOne(ctx context.Context, id string) (*Product, error) {
+	p, err := s.Storage.FindOne(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("get product: %w", err)
 	}
@@ -63,7 +63,7 @@ func (s *Service) Update(ctx context.Context, r UpdateRequest) (*Product, error)
 		return nil, fmt.Errorf("update product: %w", err)
 	}
 
-	p, err := s.Storage.Get(ctx, r.ID)
+	p, err := s.Storage.FindOne(ctx, r.ID)
 	if err != nil {
 		return nil, fmt.Errorf("update product: %w", err)
 	}
@@ -93,7 +93,7 @@ func (s *Service) Delete(ctx context.Context, id string) (*Product, error) {
 		return nil, fmt.Errorf("delete product: %w", err)
 	}
 
-	p, err := s.Storage.Get(ctx, id)
+	p, err := s.Storage.FindOne(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("delete product: %w", err)
 	}

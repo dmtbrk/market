@@ -15,12 +15,12 @@ type Server struct {
 
 func (s *Server) List(r *pb.ListRequest, stream pb.ProductService_ListServer) error {
 	ctx := context.TODO()
-	lr := product.ListRequest{
+	fr := product.FindRequest{
 		Offset: r.Offset,
 		Limit:  r.Limit,
 	}
 
-	ps, err := s.ProductService.List(ctx, lr)
+	ps, err := s.ProductService.Find(ctx, fr)
 	if err != nil {
 		return nil
 	}
@@ -41,7 +41,7 @@ func (s *Server) List(r *pb.ListRequest, stream pb.ProductService_ListServer) er
 }
 
 func (s *Server) Get(ctx context.Context, r *pb.GetRequest) (*pb.ProductReply, error) {
-	p, err := s.ProductService.Get(ctx, r.Id)
+	p, err := s.ProductService.FindOne(ctx, r.Id)
 	if err != nil {
 		return nil, err
 	}

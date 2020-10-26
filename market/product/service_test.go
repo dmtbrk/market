@@ -259,13 +259,13 @@ func TestService_Get(t *testing.T) {
 			s := &product.Service{
 				Storage: storage,
 			}
-			got, err := s.Get(tt.args.ctx, tt.args.id)
+			got, err := s.FindOne(tt.args.ctx, tt.args.id)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Get() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("FindOne() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Get() got = %v, want %v", got, tt.want)
+				t.Errorf("FindOne() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -274,7 +274,7 @@ func TestService_Get(t *testing.T) {
 func TestService_List(t *testing.T) {
 	type args struct {
 		ctx context.Context
-		r   product.ListRequest
+		r   product.FindRequest
 	}
 	tests := []struct {
 		name                    string
@@ -287,12 +287,12 @@ func TestService_List(t *testing.T) {
 			name: "Should list products",
 			args: args{
 				ctx: context.Background(),
-				r:   product.ListRequest{Offset: 2, Limit: 2},
+				r:   product.FindRequest{Offset: 2, Limit: 2},
 			},
 			setupMockProductStorage: func(m *mock.ProductStorage) {
 				m.EXPECT().List(
 					context.Background(),
-					product.ListRequest{Offset: 2, Limit: 2},
+					product.FindRequest{Offset: 2, Limit: 2},
 				).Return(
 					[]*product.Product{
 						{ID: "1", Name: "name1", Price: 100, Seller: "1"},
@@ -320,13 +320,13 @@ func TestService_List(t *testing.T) {
 			s := &product.Service{
 				Storage: storage,
 			}
-			got, err := s.List(tt.args.ctx, tt.args.r)
+			got, err := s.Find(tt.args.ctx, tt.args.r)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("List() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Find() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("List() got = %v, want %v", got, tt.want)
+				t.Errorf("Find() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
