@@ -5,6 +5,7 @@
 package mock
 
 import (
+	context "context"
 	gomock "github.com/golang/mock/gomock"
 	user "github.com/ortymid/market/market/user"
 	http "net/http"
@@ -35,16 +36,16 @@ func (m *HTTPAuthService) EXPECT() *HTTPAuthServiceMockRecorder {
 }
 
 // Authorize mocks base method
-func (m *HTTPAuthService) Authorize(arg0 *http.Request) (*user.User, error) {
+func (m *HTTPAuthService) Authorize(arg0 context.Context, arg1 *http.Request) (*user.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Authorize", arg0)
+	ret := m.ctrl.Call(m, "Authorize", arg0, arg1)
 	ret0, _ := ret[0].(*user.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Authorize indicates an expected call of Authorize
-func (mr *HTTPAuthServiceMockRecorder) Authorize(arg0 interface{}) *gomock.Call {
+func (mr *HTTPAuthServiceMockRecorder) Authorize(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Authorize", reflect.TypeOf((*HTTPAuthService)(nil).Authorize), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Authorize", reflect.TypeOf((*HTTPAuthService)(nil).Authorize), arg0, arg1)
 }
