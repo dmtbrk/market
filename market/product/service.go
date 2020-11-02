@@ -10,7 +10,7 @@ type Service struct {
 	Storage Storage
 }
 
-// List returns a list of products for the given request.
+// Find returns a list of products for the given request.
 func (s *Service) Find(ctx context.Context, r FindRequest) ([]*Product, error) {
 	ps, err := s.Storage.Find(ctx, r)
 	if err != nil {
@@ -20,7 +20,7 @@ func (s *Service) Find(ctx context.Context, r FindRequest) ([]*Product, error) {
 	return ps, nil
 }
 
-// Get returns a product for the given id. It returns product.ErrNotFound error if
+// FindOne returns a product for the given id. It returns product.ErrNotFound error if
 // there is no product with such id.
 func (s *Service) FindOne(ctx context.Context, id string) (*Product, error) {
 	p, err := s.Storage.FindOne(ctx, id)

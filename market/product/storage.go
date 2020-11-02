@@ -5,18 +5,14 @@ import "context"
 //go:generate mockgen -destination=../../mock/product_storage.go -package mock -mock_names=Storage=ProductStorage . Storage
 
 type Storage interface {
-	Lister
-	Getter
+	Finder
 	Creater
 	Updater
 	Deleter
 }
 
-type Lister interface {
+type Finder interface {
 	Find(ctx context.Context, r FindRequest) ([]*Product, error)
-}
-
-type Getter interface {
 	FindOne(ctx context.Context, id string) (*Product, error)
 }
 
