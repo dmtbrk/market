@@ -55,27 +55,20 @@ func NewProductStorage(es *elasticsearch.Client, index string) *ProductStorage {
 }
 
 func (s *ProductStorage) Find(ctx context.Context, r product.FindRequest) ([]*product.Product, error) {
-	var b bytes.Buffer
-	query := map[string]interface{}{
-		"query": map[string]interface{}{
-			"match_all": map[string]interface{}{},
-			//"match": map[string]interface{}{
-			//	"name": map[string]interface{}{
-			//		"query": r.Name,
-			//	},
-			//},
-		},
-		"from": r.Offset,
-		"size": r.Limit,
+	var body bytes.Buffer
+	bodyData := map[string]interface{}{
+		"query": makeSearchQuery(r),
+		"from":  r.Offset,
+		"size":  r.Limit,
 	}
-	if err := json.NewEncoder(&b).Encode(query); err != nil {
+	if err := json.NewEncoder(&body).Encode(bodyData); err != nil {
 		return nil, fmt.Errorf("encoding elasticsearch query: %w", err)
 	}
 
 	res, err := s.es.Search(
 		s.es.Search.WithContext(ctx),
 		s.es.Search.WithIndex(s.index),
-		s.es.Search.WithBody(&b),
+		s.es.Search.WithBody(&body),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("searching: %w", err)
@@ -111,6 +104,75 @@ func (s *ProductStorage) Find(ctx context.Context, r product.FindRequest) ([]*pr
 	}
 
 	return ps, nil
+}
+
+func makeSearchQuery(r product.FindRequest) map[string]interface{} {
+	q := make(map[string]interface{})
+
+	match_all := true
+
+	if r.Name != nil {
+		match_all = false
+
+		match := map[string]interface{}{
+			"match": map[string]interface{}{
+				"name": map[string]interface{}{
+					"query":     *r.Name,
+					"fuzziness": "AUTO",
+				},
+			},
+		}
+
+		bl, ok := q["bool"].(map[string]interface{})
+		if !ok {
+			bl = make(map[string]interface{})
+		}
+
+		must, ok := bl["must"].([]interface{})
+		if !ok {
+			must = make([]interface{}, 0)
+		}
+
+		bl["must"] = append(must, match)
+		q["bool"] = bl
+	}
+
+	if r.PriceRange != nil {
+		match_all = false
+
+		pr := make(map[string]interface{})
+		if r.PriceRange.From != nil {
+			pr["gte"] = *r.PriceRange.From
+		}
+		if r.PriceRange.To != nil {
+			pr["lte"] = *r.PriceRange.To
+		}
+
+		bl, ok := q["bool"].(map[string]interface{})
+		if !ok {
+			bl = make(map[string]interface{})
+		}
+
+		filter, ok := bl["filter"].([]interface{})
+		if !ok {
+			filter = make([]interface{}, 0)
+		}
+
+		f := map[string]interface{}{
+			"range": map[string]interface{}{
+				"price": pr,
+			},
+		}
+
+		bl["filter"] = append(filter, f)
+		q["bool"] = bl
+	}
+
+	if match_all {
+		q["match_all"] = map[string]interface{}{}
+	}
+
+	return q
 }
 
 func (s *ProductStorage) FindOne(ctx context.Context, id string) (*product.Product, error) {
