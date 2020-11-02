@@ -5,19 +5,27 @@ package pb;
 option go_package = "./pb;pb";
 
 service ProductService {
-  rpc List (ListRequest) returns (stream ProductReply) {}
-  rpc Get (GetRequest) returns (ProductReply) {}
+  rpc Find (FindRequest) returns (stream ProductReply) {}
+  rpc FindOne (FindOneRequest) returns (ProductReply) {}
   rpc Create (CreateRequest) returns (ProductReply) {}
   rpc Update (UpdateRequest) returns (ProductReply) {}
   rpc Delete (DeleteRequest) returns (ProductReply) {}
 }
 
-message ListRequest {
+message FindRequest {
   int64 offset = 1;
   int64 limit = 2;
+  // Optional filters. `optional` forces protoc to generate pointers to distinguish not set fields.
+  optional string name = 3;
+  optional PriceRange priceRange = 4;
 }
 
-message GetRequest {
+message PriceRange {
+  optional int64 from = 1;
+  optional int64 to = 2;
+}
+
+message FindOneRequest {
   string id = 1;
 }
 

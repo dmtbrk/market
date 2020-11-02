@@ -13,11 +13,22 @@ type Server struct {
 	ProductService product.Interface
 }
 
-func (s *Server) List(r *pb.ListRequest, stream pb.ProductService_ListServer) error {
+func (s *Server) Find(r *pb.FindRequest, stream pb.ProductService_FindServer) error {
 	ctx := context.TODO()
+
+	var priceRange *product.PriceRange
+	if r.PriceRange != nil {
+		priceRange = &product.PriceRange{
+			From: r.PriceRange.From,
+			To:   r.PriceRange.To,
+		}
+	}
+
 	fr := product.FindRequest{
-		Offset: r.Offset,
-		Limit:  r.Limit,
+		Offset:     r.Offset,
+		Limit:      r.Limit,
+		Name:       r.Name,
+		PriceRange: priceRange,
 	}
 
 	ps, err := s.ProductService.Find(ctx, fr)
@@ -40,7 +51,7 @@ func (s *Server) List(r *pb.ListRequest, stream pb.ProductService_ListServer) er
 	return nil
 }
 
-func (s *Server) Get(ctx context.Context, r *pb.GetRequest) (*pb.ProductReply, error) {
+func (s *Server) FindOne(ctx context.Context, r *pb.FindOneRequest) (*pb.ProductReply, error) {
 	p, err := s.ProductService.FindOne(ctx, r.Id)
 	if err != nil {
 		return nil, err

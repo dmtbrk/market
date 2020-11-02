@@ -16,19 +16,19 @@ type setupMocks func(as *mock.GRPCAuthService, ps *mock.ProductService)
 func TestServer_List(t *testing.T) {
 	tests := []struct {
 		name       string
-		req        *pb.ListRequest
+		req        *pb.FindRequest
 		setupMocks setupMocks
 		wantStream []*pb.ProductReply
 		wantErr    bool
 	}{
 		{
 			name: "Should stream products for offset=0 and limit=2",
-			req: &pb.ListRequest{
+			req: &pb.FindRequest{
 				Offset: 0,
 				Limit:  2,
 			},
 			setupMocks: func(as *mock.GRPCAuthService, ps *mock.ProductService) {
-				ps.EXPECT().List(
+				ps.EXPECT().Find(
 					gomock.Any(), product.FindRequest{Offset: 0, Limit: 2},
 				).Return(
 					[]*product.Product{
@@ -63,7 +63,7 @@ func TestServer_List(t *testing.T) {
 
 			stream := grpctest.NewProductService_ListRecorder()
 
-			if err := s.List(tt.req, stream); (err != nil) != tt.wantErr {
+			if err := s.Find(tt.req, stream); (err != nil) != tt.wantErr {
 				t.Errorf("Find() error = %v, wantErr %v", err, tt.wantErr)
 			}
 
@@ -77,7 +77,7 @@ func TestServer_List(t *testing.T) {
 func TestServer_Get(t *testing.T) {
 	type args struct {
 		ctx context.Context
-		r   *pb.GetRequest
+		r   *pb.FindOneRequest
 	}
 	tests := []struct {
 		name       string
@@ -90,10 +90,10 @@ func TestServer_Get(t *testing.T) {
 			name: "Should reply with product",
 			args: args{
 				ctx: context.Background(),
-				r:   &pb.GetRequest{Id: "1"},
+				r:   &pb.FindOneRequest{Id: "1"},
 			},
 			setupMocks: func(as *mock.GRPCAuthService, ps *mock.ProductService) {
-				ps.EXPECT().Get(gomock.Any(), "1").
+				ps.EXPECT().FindOne(gomock.Any(), "1").
 					Return(&product.Product{ID: "1", Name: "p1", Price: 100, Seller: "1"}, nil)
 			},
 			want: &pb.ProductReply{Id: "1", Name: "p1", Price: 100, Seller: "1"},
@@ -115,7 +115,7 @@ func TestServer_Get(t *testing.T) {
 				AuthService:    as,
 				ProductService: ps,
 			}
-			got, err := s.Get(tt.args.ctx, tt.args.r)
+			got, err := s.FindOne(tt.args.ctx, tt.args.r)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("FindOne() error = %v, wantErr %v", err, tt.wantErr)
 				return

@@ -42,12 +42,21 @@ func (s *ProductService) Connect(ctx context.Context, addr string) error {
 }
 
 func (s *ProductService) Find(ctx context.Context, r product.FindRequest) ([]*product.Product, error) {
-	req := &pb.ListRequest{
-		Offset: r.Offset,
-		Limit:  r.Limit,
+	var priceRange *pb.PriceRange
+	if r.PriceRange != nil {
+		priceRange = &pb.PriceRange{
+			From: r.PriceRange.From,
+			To:   r.PriceRange.To,
+		}
+	}
+	req := &pb.FindRequest{
+		Offset:     r.Offset,
+		Limit:      r.Limit,
+		Name:       r.Name,
+		PriceRange: priceRange,
 	}
 
-	stream, err := s.client.List(ctx, req)
+	stream, err := s.client.Find(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -76,11 +85,11 @@ func (s *ProductService) Find(ctx context.Context, r product.FindRequest) ([]*pr
 }
 
 func (s *ProductService) FindOne(ctx context.Context, id string) (*product.Product, error) {
-	req := &pb.GetRequest{
+	req := &pb.FindOneRequest{
 		Id: id,
 	}
 
-	rep, err := s.client.Get(ctx, req)
+	rep, err := s.client.FindOne(ctx, req)
 	if err != nil {
 		return nil, err
 	}
