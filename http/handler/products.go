@@ -2,9 +2,12 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/ortymid/market/market/product"
 	"net/http"
+	"net/url"
 	"strconv"
 )
 
@@ -13,12 +16,12 @@ type Products struct {
 }
 
 func (h *Products) Setup(r *mux.Router) {
-	// List
-	r.HandleFunc("/products", h.List).Methods(http.MethodGet)
-	r.HandleFunc("/products/", h.List).Methods(http.MethodGet)
-	// Detail
-	r.HandleFunc("/products/{id}", h.Detail).Methods(http.MethodGet)
-	r.HandleFunc("/products/{id}/", h.Detail).Methods(http.MethodGet)
+	// Find
+	r.HandleFunc("/products", h.Find).Methods(http.MethodGet)
+	r.HandleFunc("/products/", h.Find).Methods(http.MethodGet)
+	// FindOne
+	r.HandleFunc("/products/{id}", h.FindOne).Methods(http.MethodGet)
+	r.HandleFunc("/products/{id}/", h.FindOne).Methods(http.MethodGet)
 	// Create
 	r.HandleFunc("/products", h.Create).Methods(http.MethodPost)
 	r.HandleFunc("/products/", h.Create).Methods(http.MethodPost)
@@ -31,25 +34,15 @@ func (h *Products) Setup(r *mux.Router) {
 
 }
 
-func (h *Products) List(w http.ResponseWriter, r *http.Request) {
-	params := r.URL.Query()
-	offset, err := strconv.ParseInt(params.Get("offset"), 10, 64)
+func (h *Products) Find(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	findReq, err := makeFindRequestFromQuery(query)
 	if err != nil {
-		http.Error(w, "valid offset query parameter required", http.StatusBadRequest)
-		return
-	}
-	limit, err := strconv.ParseInt(params.Get("limit"), 10, 64)
-	if err != nil {
-		http.Error(w, "valid limit query parameter required", http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	lr := product.FindRequest{
-		Offset: offset,
-		Limit:  limit,
-	}
-
-	p, err := h.ProductService.Find(r.Context(), lr)
+	p, err := h.ProductService.Find(r.Context(), findReq)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -64,7 +57,57 @@ func (h *Products) List(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Products) Detail(w http.ResponseWriter, r *http.Request) {
+func makeFindRequestFromQuery(query url.Values) (r product.FindRequest, err error) {
+	offset, err := strconv.ParseInt(query.Get("offset"), 10, 64)
+	if err != nil {
+		return r, errors.New("valid offset query parameter required")
+	}
+
+	limit, err := strconv.ParseInt(query.Get("limit"), 10, 64)
+	if err != nil {
+		return r, errors.New("valid limit query parameter required")
+	}
+
+	var name *string
+	if names, ok := query["name"]; ok && len(names) > 0 {
+		name = &names[0]
+	}
+
+	var priceFrom *int64
+	if pfs, ok := query["price_from"]; ok && len(pfs) > 0 {
+		p, err := strconv.ParseInt(pfs[0], 10, 64)
+		if err != nil {
+			return r, fmt.Errorf("invalid price_from: %w", err)
+		}
+		priceFrom = &p
+	}
+
+	var priceTo *int64
+	if pfs, ok := query["price_to"]; ok && len(pfs) > 0 {
+		p, err := strconv.ParseInt(pfs[0], 10, 64)
+		if err != nil {
+			return r, fmt.Errorf("invalid price_to: %w", err)
+		}
+		priceTo = &p
+	}
+
+	var priceRange *product.PriceRange
+	if priceFrom != nil || priceTo != nil {
+		priceRange = &product.PriceRange{
+			From: priceFrom,
+			To:   priceTo,
+		}
+	}
+
+	return product.FindRequest{
+		Offset:     offset,
+		Limit:      limit,
+		Name:       name,
+		PriceRange: priceRange,
+	}, nil
+}
+
+func (h *Products) FindOne(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 
 	p, err := h.ProductService.FindOne(r.Context(), id)
